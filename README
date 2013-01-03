@@ -1,0 +1,19 @@
+== COJSGE: Canvas Open JavaScript Game Engine ==
+
+Based on http://code.google.com/p/kojage/
+
+COSJGE is intended to be a practical easy-to-use code for developing HTML5 games with the use of Canvas and JavaScript.
+
+This is still an experimental JavaScript code, which can and may change radically. Future versions are not promised to be compatible with the current one.
+
+The code included is:
+	cojsge.js 		- The engine
+	cursor.png 		- Personal cursor for on canvas display
+	example1.html 	- An example (visual)
+	example1.js 	- An example (source)
+	media 			- A folder containing all the media needed for the example
+
+Questions, Suggestions, Gratifications*?
+Contact the developer at webmaster@jugaa.me
+
+*(As in simple thanks or whatever you wish =D)
