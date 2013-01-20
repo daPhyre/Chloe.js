@@ -85,13 +85,13 @@ function onReady(){
 			if(player.y<-player.height)player.y=myGame.getHeight();*/
 
 			// Focus to player
-			myGame.focus(player,5);
+			Camera.focus(player,0,5);
 			// Move particles
 			ps.moveParticles();
 
 			// Enemy rotates
 			for(var i=0;i<3;i++)
-				enemy[i].rotation=45+Util.getAngle(enemy[i].getCenterX(),enemy[i].getCenterY(),Mouse.x+World.x,Mouse.y+World.y);
+				enemy[i].rotation=45+Util.getAngle(enemy[i].getCenterX(),enemy[i].getCenterY(),Mouse.x+Camera.x,Mouse.y+Camera.y);
 
 			// Detects if collides
 			colliding=false;
@@ -141,7 +141,7 @@ function onReady(){
 		if(CLICKING)
 			ctx.fillText ('Mouse Pressing',260,10);
 		ctx.fillText('P: '+player.x+','+player.y,10,10);
-		ctx.fillText('M: '+(Mouse.x+World.x)+','+(Mouse.y+World.y),10,20);
+		ctx.fillText('M: '+(Mouse.x+Camera.x)+','+(Mouse.y+Camera.y),10,20);
 		ctx.fillText('K: '+drawLastKey,10,30);
 		ctx.fillText('R: '+drawLastRelease,10,40);
 		//Intructions
