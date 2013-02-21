@@ -4,9 +4,9 @@
  * @since 0.1, Tu/12/Jul/11
  * @version 0.8, Sa/18/Jan/13
  */
-var stage=null,ctx=null,lastKey=null,lastRelease=null;
-var CLICKING=false,ISFULLSCREEN=false,DEBUG=false;
-var PRESSING=new Array();
+var stage=null,ctx=null,lastPress=null,lastRelease=null;
+var isFullscreen=false,screenDebug=false;
+var pressing=new Array();
 Array.prototype.insert=function(i,element){this.splice(i,0,element);}
 Array.prototype.remove=function(i){return this.splice(i,1)[0];}
 Array.prototype.removeAll=function(){this.length=0;}
@@ -25,17 +25,17 @@ window.requestAnimFrame=(function(){
 })(); 
 
 //	Game.js
-function Game(canvasId,autoFull,innerScale){
+function Game(canvasId,autoFull,fullMode){
 	var dbuff=document.createElement('canvas');
 	var bgcolor='#ccc',bgimg=null,bgfixed=false,interval=16.7;
-	var time=0,acumDt=0;
+	var gameScale=1,time=0,acumDt=0;
 	if(autoFull==null)autoFull=true;
 	window.addEventListener('load',init,false);
 
 	function init(){
 		if(canvasId==null)canvasId='canvas';
 		stage=document.getElementById(canvasId);
-		stage.style.cursor='url(\'cursor.png\') 2 2, crosshair';
+		stage.style.cursor='url(\'cursor.png\') 8 8, crosshair';
 		stage.style.background=bgcolor;
 		stage.addEventListener('contextmenu',MousePrevent,false);
 		stage.addEventListener('mousedown',MouseDown,false);
@@ -62,6 +62,10 @@ function Game(canvasId,autoFull,innerScale){
 		interval=i;
 	}
 	
+	this.getInterval=function(){
+		return interval;
+	}
+	
 	this.getScreenshot=function(){
 		window.open(stage.toDataURL());
 	}
@@ -77,11 +81,11 @@ function Game(canvasId,autoFull,innerScale){
 		while(acumDt>interval){
 			game();
 			acumDt-=interval;
-			if(DEBUG)debug.frames++;
+			if(screenDebug)debug.frames++;
 		}
 		resize();
 		repaint();
-		if(DEBUG){
+		if(screenDebug){
 			debug.run(dt);
 			debug.paint(ctx);
 		}
@@ -90,18 +94,26 @@ function Game(canvasId,autoFull,innerScale){
 	function resize(){
 		if(autoFull){
 			if(screen.width-window.innerWidth<2&&screen.height-window.innerHeight<2)
-				ISFULLSCREEN=true;
+				isFullscreen=true;
 			else
-				ISFULLSCREEN=false;
+				isFullscreen=false;
 		}
-		if(ISFULLSCREEN){
-			var w=window.innerWidth/stage.width;
-			var h=window.innerHeight/stage.height;
-			World.scale=(innerScale)?Math.max(h,w):Math.min(h,w);
-			stage.style.width=(stage.width*World.scale)+'px';
-			stage.style.height=(stage.height*World.scale)+'px';
-			stage.style.marginLeft=-(stage.width*World.scale)/2+'px';
-			stage.style.marginTop=-(stage.height*World.scale)/2+'px';
+		if(isFullscreen){
+			if(fullMode==2){
+				stage.style.width=window.innerWidth+'px';
+				stage.style.height=window.innerHeight+'px';
+				stage.style.marginLeft=-window.innerWidth/2+'px';
+				stage.style.marginTop=-window.innerHeight/2+'px';
+			}
+			else{
+				var w=window.innerWidth/stage.width;
+				var h=window.innerHeight/stage.height;
+				gameScale=(fullMode)?Math.max(h,w):Math.min(h,w);
+				stage.style.width=(stage.width*gameScale)+'px';
+				stage.style.height=(stage.height*gameScale)+'px';
+				stage.style.marginLeft=-(stage.width*gameScale)/2+'px';
+				stage.style.marginTop=-(stage.height*gameScale)/2+'px';
+			}
 			stage.style.top='50%';
 			stage.style.left='50%';
 			stage.style.position='absolute';
@@ -109,7 +121,7 @@ function Game(canvasId,autoFull,innerScale){
 			document.getElementsByTagName('body')[0].style.overflow='hidden';
 		}
 		else{
-			World.scale=1;
+			gameScale=1;
 			stage.style.width='';
 			stage.style.height='';
 			stage.style.marginLeft='';
@@ -136,16 +148,16 @@ function Game(canvasId,autoFull,innerScale){
 	}
 
 	document.addEventListener('keydown',function(evt){
-		if(!PRESSING[evt.keyCode])
-			lastKey=evt.keyCode;
-		PRESSING[evt.keyCode]=true;
-		if(lastKey>=37&&lastKey<=40)
+		if(!pressing[evt.keyCode])
+			lastPress=evt.keyCode;
+		pressing[evt.keyCode]=true;
+		if(lastPress>=37&&lastPress<=40)
 			evt.preventDefault();
 	},false);
 
 	document.addEventListener('keyup',function(evt){
 		lastRelease=evt.keyCode;
-		PRESSING[evt.keyCode]=false;
+		pressing[evt.keyCode]=false;
 	},false);
 	
 	function MousePrevent(evt){
@@ -155,145 +167,154 @@ function Game(canvasId,autoFull,innerScale){
 	
 	function MouseDown(evt){
 		MousePrevent(evt);
-		CLICKING=true;
-		if(!PRESSING[evt.button])
-			lastKey=evt.button;
-		PRESSING[evt.button]=true;
+		if(!pressing[evt.which])
+			lastPress=evt.which;
+		pressing[evt.which]=true;
 	}
 	
 	function MouseUp(evt){
-		CLICKING=false;
-		lastRelease=evt.button;
-		PRESSING[evt.button]=false;
+		lastRelease=evt.which;
+		pressing[evt.which]=false;
 	}
 	
 	function MouseMove(evt){
-		Mouse.x=parseInt(evt.pageX+document.body.scrollLeft-stage.offsetLeft)/World.scale*stage.width/stage.width;
-		Mouse.y=parseInt(evt.pageY+document.body.scrollTop-stage.offsetTop)/World.scale*stage.height/stage.height;
+		if(isFullscreen&&fullMode==2){
+			Mouse.x=evt.pageX*stage.width/window.innerWidth;
+			Mouse.y=evt.pageY*stage.height/window.innerHeight;
+		}
+		else{
+			Mouse.x=parseInt(evt.pageX+document.body.scrollLeft-stage.offsetLeft)/gameScale;
+			Mouse.y=parseInt(evt.pageY+document.body.scrollTop-stage.offsetTop)/gameScale;
+		}
 	}
 }
 //	Animation.js
-function Animation(_img,_frameWidth,_frameHeight,_pause){
-	this.frames=new Array();
-	this.frame=0;
-	this.p=0;
-	this.pause=0;
+function Animation(_img,_frameWidth,_frameHeight,_framesPerImage){
+	this.images=new Array();
+	this.currentFrame=0;
+	this.framesPerImage=1;
+	var currentImage=0;
 	var frameWidth=0;
 	var frameHeight=0;
 	var isStrip=false;
 
-	this.set=function(_img,_frameWidth,_frameHeight,_pause){
+	this.Animation=function(_img,_frameWidth,_frameHeight,_framesPerImage){
 		if(_frameWidth!=null){
 			isStrip=true;
-			this.frames.length=0;
-			this.frames.push(_img);
+			this.images.length=0;
+			this.images.push(_img);
 			frameWidth=_frameWidth;
 			frameHeight=_frameHeight;
-			this.pause=isNaN(_pause)?0:_pause;
+			this.framesPerImage=isNaN(_framesPerImage)?1:_framesPerImage;
 			return true;
 		}
 		else{
-			if(window.cosole)console.error('Data missing in Animation.set(img,frameWidth[,frameHeight,pause])');
+			if(window.cosole)console.error('Data missing in Animation(img,frameWidth[,frameHeight,framesPerImage])');
 			return false;
 		}
 	}
-	this.set(_img,_frameWidth,_frameHeight,_pause);
-
-	this.length=function(){
-		if(isStrip){
-			return this.currentFrame().width/frameWidth;
-		}
-		else
-			return this.frames.length;
-	}
+	this.Animation(_img,_frameWidth,_frameHeight,_framesPerImage);
 
 	this.addFrame=function(img){
-		isStrip=false;
-		this.frames.push(img);
-	}
-
-	this.currentFrame=function(){
-		if(isStrip)
-			return this.frames[0];
-		else
-			return this.frames[this.frame];
+		if(img!=null){
+			isStrip=false;
+			this.images.push(img);
+		}
+		else if(window.cosole)console.error('Data missing in Animation.addFrame(img)');
 	}
 
 	this.prevFrame=function(){
-		this.p++;
-		if(this.p>this.pause){
-			this.frame--;
-			this.p=0;
-		}
-		if (this.frame<0)
-			this.frame=this.length()-1;
-		return this.currentFrame();
+		this.currentFrame--;
+		if (this.currentFrame<0)
+			this.currentFrame=this.geTotalFrames()-1;
+		currentImage=parseInt(this.currentFrame/this.framesPerImage);
+		return this.currentFrame;
 	}
 
 	this.nextFrame=function(){
-		this.p++;
-		if(this.p>this.pause){
-			this.frame++;
-			this.p=0;
+		this.currentFrame++;
+		if(this.currentFrame>this.geTotalFrames()-1)
+			this.currentFrame=0;
+		currentImage=parseInt(this.currentFrame/this.framesPerImage);
+		return this.currentFrame;
+	}
+
+	this.getCurrentImage=function(){
+		if(isStrip)
+			return this.images[0];
+		else
+			return this.images[currentImage];
+	}
+
+	this.geTotalFrames=function(){
+		return this.getTotalImages()*this.framesPerImage;
+	}
+
+	this.getTotalImages=function(){
+		if(isStrip){
+			return Math.round(this.images[0].width/frameWidth);
 		}
-		if(this.frame>this.length()-1)
-			this.frame=0;
-		return this.currentFrame();
+		else
+			return this.images.length;
 	}
 
 	this.draw=function(ctx,x,y,row){
 		if(y!=null){
 			ctx.strokeStyle='#0f0';
 			if(isStrip){
-				var tImg=this.currentFrame();
-				if(isNaN(row))
-					ctx.drawImage(tImg,frameWidth*this.frame,0,frameWidth,tImg.height,x,y,frameWidth,tImg.height);
-				else
-					ctx.drawImage(tImg,frameWidth*this.frame,frameHeight*row,frameWidth,frameHeight,x,y,frameWidth,frameHeight);
-				if(World.seeCollision)
-					ctx.strokeRect(x,y,frameWidth,tImg.height);
+				var tImg=this.images[0];
+				if(isNaN(row)){
+					ctx.drawImage(tImg,frameWidth*currentImage,0,frameWidth,tImg.height,x,y,frameWidth,tImg.height);
+					if(screenDebug)
+						ctx.strokeRect(x,y,frameWidth,tImg.height);
+				}
+				else{
+					ctx.drawImage(tImg,frameWidth*currentImage,frameHeight*row,frameWidth,frameHeight,x,y,frameWidth,frameHeight);
+					if(screenDebug)
+						ctx.strokeRect(x,y,frameWidth,frameHeight);
+				}
 			}
 			else{
-				ctx.drawImage(this.currentFrame(),x,y);
-				if(World.seeCollision)
-					ctx.strokeRect(x,y,this.currentFrame().width,this.currentFrame().height);
+				ctx.drawImage(this.getCurrentImage(),x,y);
+				if(screenDebug)
+					ctx.strokeRect(x,y,this.getCurrentImage().width,this.getCurrentImage().height);
 			}
 		}
 		else if(window.cosole)console.error('Data missing in Animation.draw(ctx,x,y[,row])');
 	}
-	
+
 	this.drawSprite=function(ctx,spr,ox,oy,row){
 		if(spr!=null){
 			if(isStrip){
 				ox=(isNaN(ox))?0:ox;
 				oy=(isNaN(oy))?0:oy;
-				var h=(spr.HFlip)?-1:1;
-				var v=(spr.VFlip)?-1:1;
-				var tImg=this.currentFrame();
+				var h=(spr.hflip)?-1:1;
+				var v=(spr.vflip)?-1:1;
+				var tImg=this.images[0];
 				ctx.save();
 				if(isNaN(row)){
 					ctx.translate(spr.getCenterX()+ox-Camera.x,spr.getCenterY()+oy-Camera.y);
 					ctx.rotate(spr.rotation*Math.PI/180);
 					ctx.scale(spr.scale*h,spr.scale*v);
-					ctx.drawImage(tImg,frameWidth*this.frame,0,frameWidth,tImg.height,frameWidth*-0.5,tImg.height*-0.5,frameWidth,tImg.height);
+					ctx.drawImage(tImg,frameWidth*currentImage,0,frameWidth,tImg.height,frameWidth*-0.5,tImg.height*-0.5,frameWidth,tImg.height);
 				}
 				else{
 					ctx.translate(spr.getCenterX()+ox-Camera.x,spr.getCenterY()+oy-Camera.y);
 					ctx.rotate(spr.rotation*Math.PI/180);
 					ctx.scale(spr.scale*h,spr.scale*v);
-					ctx.drawImage(tImg,frameWidth*this.frame,frameHeight*row,frameWidth,frameHeight,frameWidth*-0.5,frameHeight*-0.5,frameWidth,frameHeight);
+					ctx.drawImage(tImg,frameWidth*currentImage,frameHeight*row,frameWidth,frameHeight,frameWidth*-0.5,frameHeight*-0.5,frameWidth,frameHeight);
 				}
 				ctx.restore();
-				if(World.seeCollision)
+				if(screenDebug)
 					spr.drawSprite(ctx);
 			}
 			else{
-				spr.drawSprite(ctx,this.currentFrame());
+				spr.drawSprite(ctx,this.getCurrentImage(),ox,oy);
 			}
 		}
 		else if(window.cosole)console.error('Data missing in Animation.drawSprite(ctx,spr[,offsetX,offsetY,row])');
 	}
-	
+
 	return this;
 }
 //	Button.js
@@ -303,8 +324,16 @@ function Button(_x,_y,_width,_height){
 	this.width=(isNaN(_width))?0:_width;
 	this.height=(isNaN(_height))?this.width:_height;
 	
-	this.isPressed=function(){
+	this.mouseOver=function(){
 		return(
+			this.x<Mouse.x&&this.x+this.width>Mouse.x&&
+			this.y<Mouse.y&&this.y+this.height>Mouse.y
+		);
+	}
+	
+	this.mouseDown=function(){
+		return(
+			pressing[1]&&
 			this.x<Mouse.x&&this.x+this.width>Mouse.x&&
 			this.y<Mouse.y&&this.y+this.height>Mouse.y
 		);
@@ -317,7 +346,7 @@ function Button(_x,_y,_width,_height){
 				oy=(isNaN(oy))?0:oy;
 				ctx.drawImage(img,this.x+ox,this.y+oy);
 			}
-			if(img==null||World.seeCollision){
+			if(img==null||screenDebug){
 				ctx.strokeStyle='#fff';
 				ctx.strokeRect(this.x,this.y,this.width,this.height);
 			}
@@ -332,13 +361,14 @@ Camera=new function(){
 	this.x=0;
 	this.y=0;
 	
-	this.focus=function(spr,slide,offset){
+	this.focus=function(spr,slide,ox,oy){
 		if(spr!=null){
 			slide=(isNaN(slide))?0:slide;
-			offset=(isNaN(offset))?0:offset;
+			ox=(isNaN(ox))?0:ox;
+			oy=(isNaN(oy))?ox:oy;
 			var cx=spr.getCenterX()-stage.width/2;
 			var cy=spr.getCenterY()-stage.height/2;
-			if(World.width<stage.width||World.width-offset*2<stage.width){
+			if(World.width<stage.width||World.width-ox*2<stage.width){
 				this.x=World.width/2-stage.width/2;
 			}
 			else{
@@ -351,13 +381,13 @@ Camera=new function(){
 				else
 					this.x=cx;
 				if(!World.loopX){
-					if(this.x<offset)
-						this.x=offset;
-					else if(this.x>World.width-stage.width-offset)
-						this.x=World.width-stage.width-offset;
+					if(this.x<ox)
+						this.x=ox;
+					else if(this.x>World.width-stage.width-ox)
+						this.x=World.width-stage.width-ox;
 				}
 			}
-			if(World.height<stage.height||World.height-offset*2<stage.height){
+			if(World.height<stage.height||World.height-oy*2<stage.height){
 				this.y=World.height/2-stage.height/2;
 			}
 			else{
@@ -370,14 +400,14 @@ Camera=new function(){
 				else
 					this.y=cy;
 				if(!World.loopY){
-					if(this.y<offset)
-						this.y=offset;
-					else if(this.y>World.height-stage.height-offset)
-						this.y=World.height-stage.height-offset;
+					if(this.y<oy)
+						this.y=oy;
+					else if(this.y>World.height-stage.height-oy)
+						this.y=World.height-stage.height-oy;
 				}
 			}
 		}
-		else if(window.cosole)console.error('Data missing in Camera.focus(spr[,slide,offset])');
+		else if(window.cosole)console.error('Data missing in Camera.focus(spr[,slide,offsetX,offsetY])');
 	}
 	
 	return this;
@@ -448,28 +478,29 @@ Mouse=new function(){
 	return this;
 }
 //	Particle.js
-function Particle(_x,_y,_diameter,_maxAge,_speed,_angle,_colorStart,_colorEnd){
+function Particle(_x,_y,_diameter,_life,_speed,_angle,_colorStart,_colorEnd){
 	this.x=0;
 	this.y=0;
 	this.ox=0;
 	this.oy=0;
 	this.diameter=0;
-	this.age=0;
-	this.maxAge=0;
+	this.life=0;
+	this.olife=0;
 	this.speed=0;
 	this.angle=0;
 	this.rotation=0;
 	this.color='#000';
 	this.colorList=new Array();
 
-	this.set=function(_x,_y,_diameter,_maxAge,_speed,_angle,_colorStart,_colorEnd){
+	this.Particle=function(_x,_y,_diameter,_life,_speed,_angle,_colorStart,_colorEnd){
 		if(_colorStart!=null){
 			this.x=_x;
 			this.y=_y;
 			this.ox=_x;
 			this.oy=_y;
 			this.diameter=_diameter+1;
-			this.maxAge=_maxAge;
+			this.life=_life;
+			this.olife=_life;
 			this.speed=_speed;
 			this.angle=_angle;
 			this.rotation=_angle;
@@ -478,20 +509,20 @@ function Particle(_x,_y,_diameter,_maxAge,_speed,_angle,_colorStart,_colorEnd){
 			if(_colorEnd!=null){
 				var cStart=hex2rgb(_colorStart);
 				var cEnd=hex2rgb(_colorEnd);
-				var red=(cStart[0]-cEnd[0])/(_maxAge+1);
-				var green=(cStart[1]-cEnd[1])/(_maxAge+1);
-				var blue=(cStart[2]-cEnd[2])/(_maxAge+1);
-				for (var i=0;i<_maxAge;i++)
+				var red=(cStart[0]-cEnd[0])/(_life+1);
+				var green=(cStart[1]-cEnd[1])/(_life+1);
+				var blue=(cStart[2]-cEnd[2])/(_life+1);
+				for (var i=0;i<_life;i++)
 					this.colorList.push(rgb2hex(cStart[0]-(i*red),cStart[1]-(i*green),cStart[2]-(i*blue)));
 			}
 			return true;
 		}
 		else{
-			if(window.cosole)console.error('Data missing in Particle.set(x,y,diameter,maxAge,speed,angle,colorStart[,colorEnd])');
+			if(window.cosole)console.error('Data missing in Particle(x,y,diameter,life,speed,angle,colorStart[,colorEnd])');
 			return false;
 		}
 	}
-	this.set(_x,_y,_diameter,_maxAge,_speed,_angle,_colorStart,_colorEnd);
+	this.Particle(_x,_y,_diameter,_life,_speed,_angle,_colorStart,_colorEnd);
 
 	function hex2rgb(h){
 		var c=new Array();
@@ -524,19 +555,19 @@ function ParticleSystem(){
 	this.gravity=0;
 	this.wind=0;
 
-	this.addParticle=function(p_x,y,diameter,maxAge,speed,angle,colorStart,colorEnd){
+	this.addParticle=function(p_x,y,diameter,life,speed,angle,colorStart,colorEnd){
 		if(isNaN(parseInt(p_x,10)))
 			this.push(p_x);
 		else
-			this.push(new Particle(p_x,y,diameter,maxAge,speed,angle,colorStart,colorEnd));
+			this.push(new Particle(p_x,y,diameter,life,speed,angle,colorStart,colorEnd));
 	}
 
 	this.moveParticles=function(){
 		for(var i=0;i<this.length;++i){
-			if (this[i].age<this[i].maxAge){
-				this[i].x+=this[i].speed*(Math.cos(this[i].angle*(Math.PI/180)))+this.wind*this[i].age;
-				this[i].y+=this[i].speed*(Math.sin(this[i].angle*(Math.PI/180)))+this.gravity*this[i].age;
-				this[i].age++;
+			if (this[i].life>0){
+				this[i].x+=this[i].speed*(Math.cos(this[i].angle*(Math.PI/180)))+this.wind*(this[i].olife-this[i].life);
+				this[i].y+=this[i].speed*(Math.sin(this[i].angle*(Math.PI/180)))+this.gravity*(this[i].olife-this[i].life);
+				this[i].life--;
 				if(this[i].colorList.length>0)
 					this[i].color=this[i].colorList.shift();
 			}
@@ -546,13 +577,12 @@ function ParticleSystem(){
 
 	this.moveParticlesO=function(){
 		for(var i=0;i<this.length;++i){
-			if (this[i].age<this[i].maxAge){
+			if (this[i].life>0){
 				this[i].ox=this[i].x;
 				this[i].oy=this[i].y;
-				var piRad=(Math.PI/180);
-				this[i].x+=this[i].speed*(Math.cos(this[i].angle*piRad))+this.wind*this[i].age;
-				this[i].y+=this[i].speed*(Math.sin(this[i].angle*piRad))+this.gravity*this[i].age;
-				this[i].age++;
+				this[i].x+=this[i].speed*(Math.cos(this[i].angle*(Math.PI/180)))+this.wind*(this[i].olife-this[i].life);
+				this[i].y+=this[i].speed*(Math.sin(this[i].angle*(Math.PI/180)))+this.gravity*(this[i].olife-this[i].life);
+				this[i].life--;
 				if(this[i].colorList.length>0)
 					this[i].color=this[i].colorList.shift();
 			}
@@ -564,7 +594,7 @@ function ParticleSystem(){
 		if(img!=null){
 			for(var i=0;i<this.length;++i){
 				ctx.save();
-				if(alpha)ctx.globalAlpha=1-this[i].age/this[i].maxAge;
+				if(alpha)ctx.globalAlpha=this[i].life/this[i].olife;
 				ctx.translate(this[i].x-Camera.x,this[i].y-Camera.y);
 				ctx.rotate(this[i].rotation*Math.PI/180);
 				ctx.drawImage(img,img.width*-0.5,img.height*-0.5);
@@ -575,7 +605,7 @@ function ParticleSystem(){
 			for(var i=0;i<this.length;++i){
 				ctx.fillStyle=this[i].color;
 				ctx.save();
-				if(alpha)ctx.globalAlpha=1-this[i].age/this[i].maxAge;
+				if(alpha)ctx.globalAlpha=this[i].life/this[i].olife;
 				ctx.beginPath();
 				ctx.arc(this[i].x-Camera.x,this[i].y-Camera.y,this[i].diameter/2,0,Math.PI*2,true);
 				ctx.closePath();
@@ -592,7 +622,7 @@ function ParticleSystem(){
 				ctx.strokeStyle=this[i].color;
 				ctx.fillStyle=this[i].color;
 				ctx.save();
-				if(alpha)ctx.globalAlpha=1-this[i].age/this[i].maxAge;
+				if(alpha)ctx.globalAlpha=this[i].life/this[i].olife;
 				ctx.beginPath();
 				ctx.moveTo(this[i].ox,this[i].oy);
 				ctx.lineTo(this[i].x,this[i].y);
@@ -627,8 +657,8 @@ function Sprite(_x,_y,_width,_height,_type){
 	this.health=0;
 	this.rotation=0;
 	this.scale=1;
-	this.VFlip=false;
-	this.HFlip=false;
+	this.vflip=false;
+	this.hflip=false;
 
 	this.var1=0;
 	this.var2=0;
@@ -770,6 +800,7 @@ function Sprite(_x,_y,_width,_height,_type){
 
 	this.collisionMap=function(type,hx,hy){
 		var collision=0;
+		var closest=this.getDiameter()/2;
 		for (var i=0;i<World.map.length;i++){
 			var spr=World.map.getSprite(i);
 			if(hy!=null)spr=new Sprite(spr.x+hx,spr.y+hy,0);
@@ -777,29 +808,44 @@ function Sprite(_x,_y,_width,_height,_type){
 				this.x<spr.x+spr.getWidth()&&
 				this.x+this.getWidth()>spr.x&&
 				this.y<spr.y+spr.getHeight()&&
-				this.y+this.getHeight()>spr.y)
-			collision=spr.type;
+				this.y+this.getHeight()>spr.y){
+			var d=this.distance(World.map.getSprite(i));
+				if(d<closest){
+					collision=i+1;
+					closest=d;
+				}
+			}
 		}
 		return collision;
 	}
 
 	this.collisionMapEx=function(exception){
-		var collision=0;
-		for (var i=0;i<World.map.length;i++){
-			var spr=World.map.getSprite(i);
-			if(((exception!=null)?exception!=i:true)&&
-				this.x<spr.x+spr.getWidth()&&
-				this.x+this.getWidth()>spr.x&&
-				this.y<spr.y+spr.getHeight()&&
-				this.y+this.getHeight()>spr.y)
-			collision=spr.type;
+		if(exception!=null){
+			var collision=0;
+			var closest=this.getDiameter()/2;
+			for (var i=0;i<World.map.length;i++){
+				var spr=World.map.getSprite(i);
+				if(((exception!=null)?exception!=i:true)&&
+					this.x<spr.x+spr.getWidth()&&
+					this.x+this.getWidth()>spr.x&&
+					this.y<spr.y+spr.getHeight()&&
+					this.y+this.getHeight()>spr.y){
+				var d=this.distance(World.map.getSprite(i));
+					if(d<closest){
+						collision=i+1;
+						closest=d;
+					}
+				}
+			}
+			return collision;
 		}
-		return collision;
+		else if(window.cosole)console.error('Data missing in Sprite.collisionMapEx(exception)');
 	}
 
 	this.collisionMapRange=function(typeMin,typeMax,hx,hy,exception){
 		if(typeMax!=null){
 			var collision=0;
+			var closest=this.getDiameter()/2;
 			for (var i=0;i<World.map.length;i++){
 				var spr=World.map.getSprite(i);
 				if(hy!=null)spr=new Sprite(spr.x+hx,spr.y+hy,0);
@@ -809,8 +855,13 @@ function Sprite(_x,_y,_width,_height,_type){
 					this.x<spr.x+spr.getWidth()&&
 					this.x+this.getWidth()>spr.x&&
 					this.y<spr.y+spr.getHeight()&&
-					this.y+this.getHeight()>spr.y)
-				collision=spr.type;
+					this.y+this.getHeight()>spr.y){
+				var d=this.distance(World.map.getSprite(i));
+					if(d<closest){
+						collision=i+1;
+						closest=d;
+					}
+				}
 			}
 			return collision;
 		}
@@ -820,6 +871,7 @@ function Sprite(_x,_y,_width,_height,_type){
 	this.collisionMapSwitch=function(type,newType,hx,hy,exception){
 		if(newType!=null){
 			var collision=0;
+			var closest=this.getDiameter()/2;
 			for (var i=0;i<World.map.length;i++){
 				var spr=World.map.getSprite(i);
 				if(hy!=null)spr=new Sprite(spr.x+hx,spr.y+hy,0);
@@ -829,10 +881,19 @@ function Sprite(_x,_y,_width,_height,_type){
 					this.x+this.getWidth()>spr.x&&
 					this.y<spr.y+spr.getHeight()&&
 					this.y+this.getHeight()>spr.y){
-						collision=spr.type;
-						if(newType>0)spr.type=newType;
-						else World.map.remove(i);
+				var d=this.distance(World.map.getSprite(i));
+					if(d<closest){
+						if(newType>0){
+							collision=i+1;
+							spr.type=newType;
+						}
+						else{
+							collision=spr.type;
+							World.map.remove(i);
+						}
+						closest=d;
 					}
+				}
 			}
 			return collision;
 		}
@@ -844,8 +905,8 @@ function Sprite(_x,_y,_width,_height,_type){
 			if(img!=null){
 				ox=(isNaN(ox))?0:ox;
 				oy=(isNaN(oy))?0:oy;
-				var h=(this.HFlip)?-1:1;
-				var v=(this.VFlip)?-1:1;
+				var h=(this.hflip)?-1:1;
+				var v=(this.vflip)?-1:1;
 				ctx.save();
 				ctx.translate(this.getCenterX()+ox-Camera.x,this.getCenterY()+oy-Camera.y);
 				ctx.rotate(this.rotation*Math.PI/180);
@@ -853,7 +914,7 @@ function Sprite(_x,_y,_width,_height,_type){
 				ctx.drawImage(img,img.width*-0.5,img.height*-0.5);
 				ctx.restore();
 			}
-			if(img==null||World.seeCollision){
+			if(img==null||screenDebug){
 				var c=this.getCenter();
 				ctx.strokeStyle='#0f0';
 				ctx.strokeRect(this.x-Camera.x,this.y-Camera.y,this.width*this.scale,this.height*this.scale);
@@ -874,39 +935,70 @@ function Sprite(_x,_y,_width,_height,_type){
 
 	return this;
 }
-// SpriteMap.js
-function SpriteMap(_img,_spriteWidth,_spriteHeight){
+// SpriteSheet.js
+function SpriteSheet(_img,_spriteWidth,_spriteHeight){
 	this.img;
 	var spriteWidth;
 	var spriteHeight;
 	
-	this.set=function(_img,_spriteWidth,_spriteHeight){
+	this.SpriteSheet=function(_img,_spriteWidth,_spriteHeight){
 		if(_spriteWidth!=null){
 			this.img=_img;
 			spriteWidth=_spriteWidth;
 			spriteHeight=(_spriteHeight==null)?_spriteWidth:_spriteHeight;
 		}
-		else if(window.cosole)console.error('Data missing in SpriteMap.set(image,spriteWidth[,spriteHeight])');
+		else if(window.cosole)console.error('Data missing in SpriteSheet(image,spriteWidth[,spriteHeight])');
 	}
-	this.set(_img,_spriteWidth,_spriteHeight);
+	this.SpriteSheet(_img,_spriteWidth,_spriteHeight);
 	
 	this.draw=function(ctx,x,y,col,row){
 		if(y!=null){
 			col=(isNaN(col))?0:col;
-			row=(isNaN(row))?0:row;
-			ctx.drawImage(this.img,col*spriteWidth,row*spriteHeight,spriteWidth,spriteHeight,x,y,spriteWidth,spriteHeight);
+			if(isNaN(row)&&this.img.width){
+				var ipr=col*Math.round(this.img.width/spriteWidth);
+				if(window.cosole)console.log('IPR: '+ipr)
+				if(col>ipr){
+					col=col%ipr;
+					row=parseInt(col/ipr);
+				}
+				else
+					row=0;
+			}
+			try{
+				ctx.drawImage(this.img,col*spriteWidth,row*spriteHeight,spriteWidth,spriteHeight,x,y,spriteWidth,spriteHeight);
+			}
+			catch(e){if(window.console)console.error(e+' Area: '+col*spriteWidth+','+row*spriteHeight+','+spriteWidth+','+spriteHeight);}
 		}
-		else if(window.cosole)console.error('Data missing in SpriteImage.draw(ctx,x,y[,col,row])');
+		else if(window.cosole)console.error('Data missing in SpriteSheet.draw(ctx,x,y[,col,row])');
+	}
+	
+	this.drawArea=function(ctx,x,y,ax,ay,aw,ah){
+		if(ah!=null){
+			try{
+				ctx.drawImage(this.img,ax,ay,aw,ah,x,y,aw,ah);
+			}
+			catch(e){if(window.console)console.error(e+' Area: '+ax+','+ay+','+aw+','+ah);}
+		}
+		else if(window.cosole)console.error('Data missing in SpriteSheet.drawArea(ctx,x,y,areaX,areaY,areaWidth,areaHeight)');
 	}
 	
 	this.drawSprite=function(ctx,spr,col,row,ox,oy){
 		if(spr!=null){
 			col=(isNaN(col))?0:col;
-			row=(isNaN(row))?0:row;
 			ox=(isNaN(ox))?0:ox;
 			oy=(isNaN(oy))?0:oy;
-			var h=(spr.HFlip)?-1:1;
-			var v=(spr.VFlip)?-1:1;
+			var h=(spr.hflip)?-1:1;
+			var v=(spr.vflip)?-1:1;
+			if(isNaN(row)&&img.width){
+				var ipr=col>Math.round(img.width/spriteWidth);
+				if(window.cosole)console.log('IPR: '+ipr)
+				if(col>ipr){
+					col=col%ipr;
+					row=parseInt(col/ipr);
+				}
+				else
+					row=0;
+			}
 			ctx.save();
 			ctx.translate(spr.getCenterX()+ox-Camera.x,spr.getCenterY()+oy-Camera.y);
 			ctx.rotate(spr.rotation*Math.PI/180);
@@ -914,20 +1006,20 @@ function SpriteMap(_img,_spriteWidth,_spriteHeight){
 			try{
 				ctx.drawImage(this.img,spriteWidth*col,spriteHeight*row,spriteWidth,spriteHeight,spriteWidth*-0.5,spriteHeight*-0.5,spriteWidth,spriteHeight);
 			}
-			catch(e){if(window.console)console.error(e+' Coords: '+col+','+row);}
+			catch(e){if(window.console)console.error(e+' Area: '+col*spriteWidth+','+row*spriteHeight+','+spriteWidth+','+spriteHeight);}
 			ctx.restore();
-			if(World.seeCollision)
+			if(screenDebug)
 				spr.drawSprite(ctx);
 		}
-		else if(window.cosole)console.error('Data missing in SpriteImage.drawSprite(ctx,spr[,col,row,offsetX,offsetY])');
+		else if(window.cosole)console.error('Data missing in SpriteSheet.drawSprite(ctx,spr[,col,row,offsetX,offsetY])');
 	}
 	
-	this.drawSpriteArea=function(ctx,spr,ax,ay,aw,ah,ox,oy){
+	this.drawSpriteFromArea=function(ctx,spr,ax,ay,aw,ah,ox,oy){
 		if(ah!=null){
 			ox=(isNaN(ox))?0:ox;
 			oy=(isNaN(oy))?0:oy;
-			var h=(spr.HFlip)?-1:1;
-			var v=(spr.VFlip)?-1:1;
+			var h=(spr.hflip)?-1:1;
+			var v=(spr.vflip)?-1:1;
 			ctx.save();
 			ctx.translate(spr.getCenterX()+ox-Camera.x,spr.getCenterY()+oy-Camera.y);
 			ctx.rotate(spr.rotation*Math.PI/180);
@@ -935,12 +1027,12 @@ function SpriteMap(_img,_spriteWidth,_spriteHeight){
 			try{
 				ctx.drawImage(this.img,ax,ay,aw,ah,aw*-0.5,ah*-0.5,aw,ah);
 			}
-			catch(e){if(window.console)console.error(e+' Coords: '+ax+','+ay+','+aw+','+ah);}
+			catch(e){if(window.console)console.error(e+' Area: '+ax+','+ay+','+aw+','+ah);}
 			ctx.restore();
-			if(World.seeCollision)
+			if(screenDebug)
 				spr.drawSprite(ctx);
 		}
-		else if(window.cosole)console.error('Data missing in SpriteImage.drawSprite(ctx,spr,areaX,areaY,areaWidth,areaHeight[,offsetX,offsetY])');
+		else if(window.cosole)console.error('Data missing in SpriteSheet.drawSprite(ctx,spr,areaX,areaY,areaWidth,areaHeight[,offsetX,offsetY])');
 	}
 	
 	return this;
@@ -954,14 +1046,14 @@ function SpriteVector(){
 			this.push(new Sprite(spr_x,y,width,height,type));
 	}
 
-	this.addMap=function(map,cols,width,height,sprVctr){
+	this.addMap=function(map,cols,width,height,masterSprites){
 		if(width!=null){
 			height=(isNaN(height))?width:height;
 			for(var a=0;a<map.length;a++)
 				if(map[a]>0){
 					var spr;
-					if(sprVctr!=null){
-						spr=new Sprite(sprVctr.getSprite(map[a]));
+					if(masterSprites!=null){
+						spr=new Sprite(masterSprites.getSprite(map[a]));
 						spr.setOrigin((a%cols)*width,parseInt(a/cols)*height);
 						spr.resetPosition();
 					}
@@ -971,7 +1063,7 @@ function SpriteVector(){
 					this.addSprite(spr);
 				}
 		}
-		else if(window.cosole)console.error('Data missing in SpriteVector.addMap(map,cols,width[,height,sprVctr])');
+		else if(window.cosole)console.error('Data missing in SpriteVector.addMap(map,cols,width[,height,masterSprites])');
 	}
 
 	this.getSprite=function(i){
@@ -1080,9 +1172,7 @@ Util=new function(){
 World=new function(){
 	this.width=0;
 	this.height=0;
-	this.scale=1;
 	this.map=new SpriteVector();
-	this.seeCollision=false;
 	this.loopX=false;
 	this.loopY=false;
 
@@ -1105,28 +1195,23 @@ World=new function(){
 		else if(window.cosole)console.error('Data missing in World.setSize(width,height)');
 	}
 
-	this.drawMap=function(ctx,img,ipr,deviation){
+	this.drawMap=function(ctx,img,deviation){
 		if(ctx!=null){
 			ctx.strokeStyle='#f00';
+			ctx.fillStyle='#f00';
 			for(var i=0;i<this.map.length;i++){
 				var spr=this.map[i];
 				if(img!=null){
 					var de=(deviation)?spr.type+spr.var1:spr.type;
-					if(img instanceof SpriteMap){
-						var col=de;
-						var row=0;
-						if(!isNaN(ipr)){
-							col=de%ipr;
-							row=parseInt(de/ipr);
-						}
-						img.draw(ctx,spr.x-Camera.x,spr.y-Camera.y,col,row);
+					if(img instanceof SpriteSheet){
+						img.draw(ctx,spr.x-Camera.x,spr.y-Camera.y,de);
 						if(this.loopX){
-							if(Camera.x<0)img.draw(ctx,spr.x-this.width-Camera.x,spr.y-Camera.y,col,row);
-							else img.draw(ctx,spr.x+this.width-Camera.x,spr.y-Camera.y,col,row);
+							if(Camera.x<0)img.draw(ctx,spr.x-this.width-Camera.x,spr.y-Camera.y,de);
+							else img.draw(ctx,spr.x+this.width-Camera.x,spr.y-Camera.y,de);
 						}
 						if(this.loopY){
-							if(Camera.y<0)img.draw(ctx,spr.x-Camera.x,spr.y-this.height-Camera.y,col,row);
-							else img.draw(ctx,spr.x-Camera.x,spr.y+this.height-Camera.y,col,row);
+							if(Camera.y<0)img.draw(ctx,spr.x-Camera.x,spr.y-this.height-Camera.y,de);
+							else img.draw(ctx,spr.x-Camera.x,spr.y+this.height-Camera.y,de);
 						}
 					}
 					else{
@@ -1144,10 +1229,12 @@ World=new function(){
 						}
 					}
 				}
-				if(img==null||this.seeCollision)
+				if(img==null||screenDebug){
 					ctx.strokeRect(spr.x-Camera.x,spr.y-Camera.y,spr.width,spr.height);
+					ctx.fillText(i+1,spr.x-Camera.x,spr.y+spr.width-Camera.y);
+				}
 			}
-			if(this.seeCollision){
+			if(screenDebug){
 				ctx.strokeStyle='#999';
 				ctx.strokeRect(-Camera.x,-Camera.y,Camera.width,Camera.height);
 				Mouse.draw(ctx);
