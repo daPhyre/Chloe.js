@@ -54,10 +54,10 @@ The current pseudo-classes in COJSGE are these:
  * [Particle] (#particle)
  * [ParticleSystem] (#particlesystem)
  * [Sprite] (#sprite)
- * [SpriteMap] (#spritemap)
+ * [SpriteSheet] (#spritesheet)
  * [SpriteVector] (#spritevector)
- 
- Static pseudo-classes:
+
+Static pseudo-classes:
  * [Camera] (#camera)
  * [Mouse] (#mouse)
  * [Util] (#util)
@@ -82,12 +82,12 @@ The context of the current canvas. Direct use outside the paint loop is recomend
 ```idl
 long lastPress
 ```
-The last pressed key on the keyboard, or the last pressed mouse button. To know if an specific key has been pressed, you should call for example `if(lastPress==KEY_SPACEBAR)` (see [cojsge_defs](#cojsge_defs)). You should assign `null` to `lastPress` after using it, as the loop will continue returning `true` in the past example if not.
+The last pressed key on the keyboard, or the last pressed mouse button. To know if an specific key has been pressed, you should call for example `if(lastPress==KEY_SPACEBAR)` (see [cojsge_defs](#cojsge_defsjs)). You should assign `null` to `lastPress` after using it, as the loop will continue returning `true` in the past example if not.
 
 ```idl
 long lastRelease
 ```
-The last released key on the keyboard, or the last released mouse button. To know if an specific key has been released, you should call for example `if(lastRelease==KEY_SPACEBAR)` (see [cojsge_defs](#cojsge_defs)). You should assign `null` to `lastRelease` after using it, as the loop will continue returning `true` in the past example if not.
+The last released key on the keyboard, or the last released mouse button. To know if an specific key has been released, you should call for example `if(lastRelease==KEY_SPACEBAR)` (see [cojsge_defs](#cojsge_defsjs)). You should assign `null` to `lastRelease` after using it, as the loop will continue returning `true` in the past example if not.
 
 ```idl
 boolean isFullscreen
@@ -102,7 +102,7 @@ Turns screen debugging mode on/off. Turning on `screenDebug` shows tecnical info
 ```idl
 boolean pressing[]
 ```
-Array that keep track of the current pressed keys and mouse buttons. To know if an specific key is being press, you should call for example `if(pressing[KEY_SPACEBAR])` (see [cojsge_defs](#cojsge_defs)).
+Array that keep track of the current pressed keys and mouse buttons. To know if an specific key is being press, you should call for example `if(pressing[KEY_SPACEBAR])` (see [cojsge_defs](#cojsge_defsjs)).
 
 ### Public functions
 #### onReady
@@ -122,7 +122,7 @@ The main loop for your game logic. Is executed every "game.interval" times (Defa
 void paint(CanvasRenderingContext2D ctx)
 ```
 Is called every possible time that requestAnimationFrame allow (Around 60 times per second). Is asyncroned from the game loop.
-**Parameters:**
+**Parameters:** 
 *ctx* - The context to be used for painting.
 
 #### random
@@ -131,9 +131,9 @@ double random(double max)
 ```
 Small public util to get a random floating number from 0.0 to max. Should be parsed with `parseInt(random(max))` to get an integer number.
 
-**Parameters:**
+**Parameters:** 
 *max* - The max number `random` should return.
-**Returns:**
+**Returns:** 
 A random floating number from 0.0 to `max`.
 
 #### Array
@@ -142,13 +142,13 @@ COJSGE extends the `Array` elements, giving them the properties `insert(long pos
 ## Game
 The `Game` pseudo-class creates a new game assigned to the canvas with id "canvas", if no other ID is specified. This class is needed to start the game.
 
-**[Contructor summary](#game-constructor)**
-|[Game(optional DOMString canvasId, optional boolean autoFull, optional long fullMode)](#game.game)|
+**[Contructor summary](#game-constructor)** 
+| [Game(optional DOMString canvasId, optional boolean autoFull, optional long fullMode)](#gamegame)	|
 
-**[Functions summary](#game-functions)**
-|void	|[getScreenshot(void)](#game.getscreenshot)	|
-|void	|[setBackground(DOMString color, optional DOMString image, optional boolean fixed)](#game.setbackground)	|
-|void	|[setInterval(double interval)](#game.setinterval)	|
+**[Functions summary](#game-functions)** 
+| void	| [getScreenshot(void)](#gamegetscreenshot)	|
+| void	| [setBackground(DOMString color, optional DOMString image, optional boolean fixed)](#gamesetbackground)	|
+| void	| [setInterval(double interval)](#gamesetinterval)	|
 
 ### Game constructor
 #### Game.Game
@@ -159,7 +159,7 @@ Game(optional DOMString canvasId = "canvas",
 ```
 Creates a new game asigned to our canvas with ID canvasID.
 
-**Parameters:**
+**Parameters:** 
 *canvasId* - ID of the canvas to bound the game. If no ID is given, COJSGE will search for the DOMElement with ID "canvas".
 *autoFull* - Sets if the game will fill automatically the screen when user enters into Fullscreen mode (Like, when pressing F11).
 *fullMode* - The way to fill the screen when in Fullscreen Mode. 0 is FULLSCREEN_NORMAL (bars of BackgroundColor will be added if needed), 1 is FULLSCREEN_ZOOM (stage will crop to fill screen) and 2 is FULLSCREEN_STRETCH (image will stretch to fill the screen).
@@ -180,7 +180,7 @@ void setBackground(DOMString color,
 ```
 Sets the background properties.
 
-**Parameters:**
+**Parameters:** 
 *color* - The color for the background.
 *image* - Image to be tiled in the background.
 *fixed* - Sets if the background images will be fixed when the camera moves.
@@ -192,29 +192,29 @@ void setInterval(double interval)
 ```
 Sets the time between calls to the `game` function.
 
-**Parameters:**
+**Parameters:** 
 *interval* - The time in miliseconds between calls. Default is 16.6 (Around 60 frames per second).
 
 ## Animation
 As it is recomended to use personal SpriteSheets for more optimized games, this pseudo-class offers an easy and simple way to make animations in your game.
 
-**[Variables summary](#animation-variables)**
-|Image	|[images](#animation.images)	|
-|long	|[currentFrame](#animation.currentframe)	|
-|long	|[framesPerImage](#animation.framesperimage)	|
+**[Variables summary](#animation-variables)** 
+| Image	| [images](#animationimages)	|
+| long	| [currentFrame](#animationcurrentframe)	|
+| long	| [framesPerImage](#animationframesperimage)	|
 
-**[Contructor summary](#animation-constructor)**
-|[Animation(Image image, long frameWidth, optional long frameHeight, optional long framesPerImage)](#animation.animation)|
+**[Contructor summary](#animation-constructor)** 
+| [Animation(Image image, long frameWidth, optional long frameHeight, optional long framesPerImage)](#animationanimation)	|
 
-**[Functions summary](#animation-functions)**
-|void	|[addFrame(Image img)](#animation.addframe)	|
-|void	|[draw(CanvasRenderingContext2D ctx, double x, double y, optional long row)](#animation.draw)	|
-|void	|[drawSprite(CanvasRenderingContext2D ctx, Sprite spr, optional double offsetX, optional double offsetY, optional long row)](#animation.drawsprite)	|
-|Image	|[getCurrentImage(void)](#animation.getcurrentimage)	|
-|long	|[getTotalFrames(void)](#animation.gettotalframes)	|
-|long	|[getTotalImages(void)](#animation.gettotalimages)	|
-|long	|[nextFrame(void)](#animation.nextframe)	|
-|long	|[prevFrame(void)](#animation.prevframe)	|
+**[Functions summary](#animation-functions)** 
+| void	| [addFrame(Image img)](#animationaddframe)	|
+| void	| [draw(CanvasRenderingContext2D ctx, double x, double y, optional long row)](#animationdraw)	|
+| void	| [drawSprite(CanvasRenderingContext2D ctx, Sprite spr, optional double offsetX, optional double offsetY, optional long row)](#animationdrawsprite)	|
+| Image	| [getCurrentImage(void)](#animationgetcurrentimage)	|
+| long	| [getTotalFrames(void)](#animationgettotalframes)	|
+| long	| [getTotalImages(void)](#animationgettotalimages)	|
+| long	| [nextFrame(void)](#animationnextframe)	|
+| long	| [prevFrame(void)](#animationprevframe)	|
 
 ### Animation variables
 #### Animation.images
@@ -245,7 +245,7 @@ Animation(Image image,
 ```
 Creates a new animation strip. If you want to use `Animation` as an animation array of images, you can construct it sending the first image array and a random frameWidth, or you can construct it sending nothing, through in this last case, your debugging console will display an error; just ignore it.
 
-**Parameters:**
+**Parameters:** 
 *image* - The image to be used as an animation strip.
 *frameWidth* - The width of each frame in pixels.
 *frameHeight* - If your animation strip contains several animation (Each one on a different row, and all with the same number of animation sprites), you must send here the height of the frame heights. Otherwise, just send `null`.
@@ -258,7 +258,7 @@ void addFrame(Image img)
 ```
 Adds a new image to the animation array. If there was an animation strip before, the animation strip will dissapear and it's image will become part of the current animation.
 
-**Parameters:**
+**Parameters:** 
 *image* - The new image to be pushed into the animation array.
 
 #### Animation.draw
@@ -270,7 +270,7 @@ void draw(CanvasRenderingContext2D ctx,
 ```
 Draws the current frame on the given `CanvasRenderingContext2D`.
 
-**Parameters:**
+**Parameters:** 
 *ctx* - The `CanvasRenderingContext2D` where the image will be drawn.
 *x* - The x coordinate where the image to be drawn.
 *y* - The y coordinate where the image to be drawn.
@@ -286,7 +286,7 @@ void drawSprite(CanvasRenderingContext2D ctx,
 ```
 Draws the current frame on the given `CanvasRenderingContext2D` with the sprite properties.
 
-**Parameters:**
+**Parameters:** 
 *ctx* - The `CanvasRenderingContext2D` where the image will be drawn.
 *spr* - The sprite to be drawn.
 *offsetX* - The offset in the x coordinate to move the image from the sprite.
@@ -299,7 +299,7 @@ Image getCurrentImage(void)
 ```
 Gets the image of the current frame. If the animation is an strip animation, it will return the only image strip as a whole.
 
-**Returns:**
+**Returns:** 
 The image of the current frame.
 
 #### Animation.getTotalFrames
@@ -308,7 +308,7 @@ long getTotalFrames(void)
 ```
 Gets the total of frames within the animation.
 
-**Returns:**
+**Returns:** 
 The total of frames in `Animation`.
 
 #### Animation.getTotalImages
@@ -317,7 +317,7 @@ long getTotalImages(void)
 ```
 Gets the total of images within the animation.
 
-**Returns:**
+**Returns:** 
 The total of images in `Animation`.
 
 #### Animation.nextFrame
@@ -326,7 +326,7 @@ long nextFrame(void)
 ```
 Moves to the next frame in the animation and returns the current frame. This function should be called in `paint(ctx)` at least once in order to forward animate the animation.
 
-**Returns:**
+**Returns:** 
 The current frame after moving forward.
 
 #### Animation.prevFrame
@@ -335,19 +335,19 @@ long prevFrame(void)
 ```
 Moves to the previous frame in the animation and returns current frame. This function should be called in `paint(ctx)` at least once in order to backward animate the animation.
 
-**Returns:**
+**Returns:** 
 The current frame after moving backward.
 
 ## Button
 This pseudo-class helps with the creation of a simple button, interactive only with the mouse.
 
-**[Contructor summary](#button-constructor)**
-|[Button(double x, double y, double width, double height)](#button.button)|
+**[Contructor summary](#button-constructor)** 
+| [Button(double x, double y, double width, double height)](#buttonbutton)	|
 
-**[Functions summary](#button-functions)**
-|boolean	|[mouseOver(void)](#button.mouseover)	|
-|boolean	|[mouseDown(void)](#button.mousedown)	|
-|void	|[draw(CanvasRenderingContext2D ctx, optional Image img, optional double offsetX, optional double offsetY)](#button.draw)	|
+**[Functions summary](#button-functions)** 
+| boolean	| [mouseOver(void)](#buttonmouseover)	|
+| boolean	| [mouseDown(void)](#buttonmousedown)	|
+| void	| [draw(CanvasRenderingContext2D ctx, optional Image img, optional double offsetX, optional double offsetY)](#buttondraw)	|
 
 ### Button constructor
 #### Button.Button
@@ -359,7 +359,7 @@ Button(double x,
 ```
 Creates the new button within the specified bound of the rectangle sent.
 
-**Parameters:**
+**Parameters:** 
 *x* - The x coordinate of the button.
 *y* - The y coordinate of the button.
 *width* - The width of the button.
@@ -372,7 +372,7 @@ boolean mouseOver(void)
 ```
 Checks if the mouse cursor is over the button.
 
-**Returns:**
+**Returns:** 
 `true` if the mouse cursor is over the button, `false` otherwise.
 
 #### Button.mouseDown
@@ -381,7 +381,7 @@ boolean mouseDown(void)
 ```
 Checks if the mouse left button is being pressed while the cursor is over the button.
 
-**Returns:**
+**Returns:** 
 `true` if the mouse left button is being pressed while the cursor is over the button, `false` otherwise.
 
 #### Button.draw
@@ -393,7 +393,7 @@ void draw(CanvasRenderingContext2D ctx,
 ```
 Draws the button in the given `CanvasRenderingContext2D`. If no image is specified, this function will draw the button collision bounds.
 
-**Parameters:**
+**Parameters:** 
 *ctx* - The `CanvasRenderingContext2D` where the button will be drawn.
 *image* - The specified image to be drawn.
 *offsetX* - The offset in the x coordinate to move the image from the button.
@@ -402,22 +402,22 @@ Draws the button in the given `CanvasRenderingContext2D`. If no image is specifi
 ## Particle
 Creates a new particle to be managed with the particle system.
 
-**[Variables summary](#particle-variables)**
-|double	|[x](#particle.x)	|
-|double	|[y](#particle.y)	|
-|double	|[ox](#particle.ox)	|
-|double	|[oy](#particle.oy)	|
-|double	|[diameter](#particle.diameter)	|
-|long	|[life](#particle.life)	|
-|long	|[olife](#particle.olife)	|
-|double	|[speed](#particle.speed)	|
-|double	|[angle](#particle.angle)	|
-|double	|[rotation](#particle.rotation)	|
-|DOMString	|[color](#particle.color)	|
-|DOMString	|[colorList](#particle.colorList)	|
+**[Variables summary](#particle-variables)** 
+| double	| [x](#particlex)	|
+| double	| [y](#particley)	|
+| double	| [ox](#particleox)	|
+| double	| [oy](#particleoy)	|
+| double	| [diameter](#particlediameter)	|
+| long	| [life](#particlelife)	|
+| long	| [olife](#particleolife)	|
+| double	| [speed](#particlespeed)	|
+| double	| [angle](#particleangle)	|
+| double	| [rotation](#particlerotation)	|
+| DOMString	| [color](#particlecolor)	|
+| DOMString	| [colorList](#particlecolorList)	|
 
-**[Contructor summary](#animation-constructor)**
-|[Particle(double x, double y, double diameter, long life, double speed, double angle, DOMString colorStart, optional DOMString colorEnd)](#particle.particle)	|
+**[Contructor summary](#particle-constructor)** 
+| [Particle(double x, double y, double diameter, long life, double speed, double angle, DOMString colorStart, optional DOMString colorEnd)](#particleparticle)	|
 
 ### Particle variables
 #### Particle.x
@@ -507,7 +507,7 @@ Particle(double x,
 ```
 Creates a new particle with the given attributes.
 
-**Parameters:**
+**Parameters:** 
 *x* - The center x coordinate of the particle.
 *y* - The center x coordinate of the particle.
 *life* - The lifespan of the particle.
@@ -517,23 +517,23 @@ Creates a new particle with the given attributes.
 *colorEnd* - If set, the particle will slowly turn from colorStart to colorEnd through its lifespan.
 
 ## ParticleSystem
-**extends Array**
+**extends Array** 
 Contains an array of particles to be manipulated as one system.
 
-**[Variables summary](#particlesystem-variables)**
-|double	|[gravity](#particlesystem.gravity)	|
-|double	|[wind](#particlesystem.wind)	|
+**[Variables summary](#particlesystem-variables)** 
+| double	| [gravity](#particlesystemgravity)	|
+| double	| [wind](#particlesystemwind)	|
 
-**[Contructor summary](#particlesystem-constructor)**
-|[ParticleSystem(void)](#particlesystem.particlesystem)	|
+**[Contructor summary](#particlesystem-constructor)** 
+| [ParticleSystem(void)](#particlesystemparticlesystem)	|
 
-**[Functions summary](#particlesystem-functions)**
-|void	|[addParticle(Particle particle)](#particlesystem.addParticle)	|
-|void	|[addParticle(double x, double y, double diameter, long life, double speed, double angle, DOMString colorStart, optional DOMString colorEnd)](#particlesystem.addParticle)	|
-|void	|[moveParticles(void)](#particlesystem.moveParticles)	|
-|void	|[moveParticlesO(void)](#particlesystem.moveParticlesO)	|
-|void	|[drawParticles(CanvasRenderingContext2D ctx, optional boolean alpha, optional Image image)](#particlesystem.drawParticles)	|
-|void	|[drawParticlesO(CanvasRenderingContext2D ctx, optional boolean alpha)](#particlesystem.drawParticlesO)	|
+**[Functions summary](#particlesystem-functions)** 
+| void	| [addParticle(Particle particle)](#particlesystemaddParticle)	|
+| void	| [addParticle(double x, double y, double diameter, long life, double speed, double angle, DOMString colorStart, optional DOMString colorEnd)](#particlesystemaddParticle)	|
+| void	| [moveParticles(void)](#particlesystemmoveParticles)	|
+| void	| [moveParticlesO(void)](#particlesystemmoveParticlesO)	|
+| void	| [drawParticles(CanvasRenderingContext2D ctx, optional boolean alpha, optional Image image)](#particlesystemdrawParticles)	|
+| void	| [drawParticlesO(CanvasRenderingContext2D ctx, optional boolean alpha)](#particlesystemdrawParticlesO)	|
 
 ### ParticleSystem variables
 #### ParticleSystem.gravity
@@ -562,7 +562,7 @@ void addParticle(Particle particle)
 ```
 Pushes the given particle into the particle system.
 
-**Parameters:**
+**Parameters:** 
 *particle* - The particle to be pushed into the particle system.
 
 ```idl
@@ -577,7 +577,7 @@ void addParticle(double x,
 ```
 Creates a new particle with the given attributes and then pushes it into the particle system.
 
-**Parameters:**
+**Parameters:** 
 *x* - The center x coordinate of the particle.
 *y* - The center x coordinate of the particle.
 *life* - The lifespan of the particle.
@@ -606,7 +606,7 @@ void drawParticles(CanvasRenderingContext2D ctx,
 ```
 Draws the particles within the particle system.
 
-**Parameters:**
+**Parameters:** 
 *ctx* - The `CanvasRenderingContext2D` where the particles will be drawn.
 *alpha* - If `true`, the particles will slowly fade out in transparency through its lifespan.
 *image* - If set, the particles will be drawn as the image instead of colour circles, with the given rotation of each particle.
@@ -618,63 +618,63 @@ void drawParticlesO(CanvasRenderingContext2D ctx,
 ```
 Draws the particles within the particle system as lines, from the origin to their current position.
 
-**Parameters:**
+**Parameters:** 
 *ctx* - The `CanvasRenderingContext2D` where the particles will be drawn.
 *alpha* - If `true`, the particles will slowly fade out in transparency through its lifespan.
 
 ## Sprite
 This pseudo-class creates an element to be used in the game, interactive with other sprites.
 
-**[Variables summary](#sprite-variables)**
-|double	|[x](#sprite.x)	|
-|double	|[y](#sprite.y)	|
-|double	|[width](#sprite.width)	|
-|double	|[height](#sprite.height)	|
-|long	|[type](#sprite.type)	|
-|long	|[health](#sprite.health)	|
-|double	|[vx](#sprite.vx)	|
-|double	|[vy](#sprite.vy)	|
-|double	|[ox](#sprite.ox)	|
-|double	|[oy](#sprite.oy)	|
-|long	|[ohealth](#sprite.ohealth)	|
-|double	|[rotation](#sprite.rotation)	|
-|double	|[scale](#sprite.scale)	|
-|boolean	|[vflip](#sprite.vflip)	|
-|boolean	|[hflip](#sprite.hflip)	|
-|double	|[var1](#sprite.var1)	|
-|double	|[var2](#sprite.var2)	|
-|boolean	|[flag1](#sprite.flag1)	|
-|boolean	|[flag2](#sprite.flag2)	|
+**[Variables summary](#sprite-variables)** 
+| double	| [x](#spritex)	|
+| double	| [y](#spritey)	|
+| double	| [width](#spritewidth)	|
+| double	| [height](#spriteheight)	|
+| long	| [type](#spritetype)	|
+| long	| [health](#spritehealth)	|
+| double	| [vx](#spritevx)	|
+| double	| [vy](#spritevy)	|
+| double	| [ox](#spriteox)	|
+| double	|[ oy](#spriteoy)	|
+| long	| [ohealth](#spriteohealth)	|
+| double	| [rotation](#spriterotation)	|
+| double	| [scale](#spritescale)	|
+| boolean	| [vflip](#spritevflip)	|
+| boolean	| [hflip](#spritehflip)	|
+| double	| [var1](#spritevar1)	|
+| double	| [var2](#spritevar2)	|
+| boolean	| [flag1](#spriteflag1)	|
+| boolean	| [flag2](#spriteflag2)	|
 
-**[Contructor summary](#sprite-constructor)**
-|[Sprite(double x, double y, double width, optional double height, optional long type)](#sprite.sprite)	|
+**[Contructor summary](#sprite-constructor)** 
+| [Sprite(double x, double y, double width, optional double height, optional long type)](#spritesprite)	|
 
-**[Functions summary](#sprite-functions)**
-|boolean	|[collisionBox(Sprite spr, optional double hotspotX, optional double hotspotY)](#sprite.collisionbox)	|
-|boolean	|[collisionCircle(Sprite spr, optional boolean inner)](#sprite.collisioncircle)	|
-|long	|[collisionMap(optional long type, optional double hotspotX, optional double hotspotY)](#sprite.collisionmap)	|
-|long	|[collisionMapEx(long exception)](#sprite.collisionmapex)	|
-|long	|[collisionMapRange(long typeMin, long typeMax, optional double hotspotX, optional double hotspotY, optional long exception)](#sprite.collisionmaprange)	|
-|long	|[collisionMapSwitch(long type, long newType, optional double hotspotX, optional double hotspotY, optional long exception)](#sprite.collisionmapswitch)	|
-|boolean	|[collisionPoint(double x, double y)](#sprite.collisionpoint)	|
-|void	|[drawSprite(CanvasRenderingContext2D ctx, optional Image img, optional double offsetX, optional double offsetY)](#sprite.drawsprite)	|
-|double	|[getDistance(Sprite spr, optional boolean inner)](#sprite.getdistance)	|
-|double	|[getAngle(void)](#sprite.getangle)	|
-|double	|[getAngle(Sprite spr)](#sprite.getangle)	|
-|Point	|[getCenter(void)](#sprite.getcenter)	|
-|double	|[getCenterX(void)](#sprite.getcenterx)	|
-|double	|[getCenterY(void)](#sprite.getcentery)	|
-|double	|[getDiameter(optional boolean inner)](#sprite.getdiameter)	|
-|double	|[getSpeed(void)](#sprite.getspeed)	|
-|double	|[getWidth(void)](#sprite.getwidth)	|
-|double	|[getHeight(void)](#sprite.getheight)	|
-|void	|[move(void)](#sprite.move)	|
-|void	|[reset(void)](#sprite.reset)	|
-|void	|[resetPosition(void)](#sprite.resetposition)	|
-|void	|[setDirection(double angle, double speed)](#sprite.setdirection)	|
-|void	|[setHealth(long health)](#sprite.sethealth)	|
-|void	|[setOrigin(double x, double y)](#sprite.setorigin)	|
-|void	|[setPosition(double x, double y)](#sprite.setposition)	|
+**[Functions summary](#sprite-functions)** 
+| boolean	| [collisionBox(Sprite spr, optional double hotspotX, optional double hotspotY)](#spritecollisionbox)	|
+| boolean	| [collisionCircle(Sprite spr, optional boolean inner)](#spritecollisioncircle)	|
+| long	| [collisionMap(optional long type, optional double hotspotX, optional double hotspotY)](#spritecollisionmap)	|
+| long	| [collisionMapEx(long exception)](#spritecollisionmapex)	|
+| long	| [collisionMapRange(long typeMin, long typeMax, optional double hotspotX, optional double hotspotY, optional long exception)](#spritecollisionmaprange)	|
+| long	| [collisionMapSwitch(long type, long newType, optional double hotspotX, optional double hotspotY, optional long exception)](#spritecollisionmapswitch)	|
+| boolean	| [collisionPoint(double x, double y)](#spritecollisionpoint)	|
+| void	| [drawSprite(CanvasRenderingContext2D ctx, optional Image img, optional double offsetX, optional double offsetY)](#spritedrawsprite)	|
+| double	| [getDistance(Sprite spr, optional boolean inner)](#spritegetdistance)	|
+| double	| [getAngle(void)](#spritegetangle)	|
+| double	| [getAngle(Sprite spr)](#spritegetangle)	|
+| Point	| [getCenter(void)](#spritegetcenter)	|
+| double	| [getCenterX(void)](#spritegetcenterx)	|
+| double	| [getCenterY(void)](#spritegetcentery)	|
+| double	| [getDiameter(optional boolean inner)](#spritegetdiameter)	|
+| double	| [getSpeed(void)](#spritegetspeed)	|
+| double	| [getWidth(void)](#spritegetwidth)	|
+| double	| [getHeight(void)](#spritegetheight)	|
+| void	| [move(void)](#spritemove)	|
+| void	| [reset(void)](#spritereset)	|
+| void	| [resetPosition(void)](#spriteresetposition)	|
+| void	| [setDirection(double angle, double speed)](#spritesetdirection)	|
+| void	| [setHealth(long health)](#spritesethealth)	|
+| void	| [setOrigin(double x, double y)](#spritesetorigin)	|
+| void	| [setPosition(double x, double y)](#spritesetposition)	|
 
 ### Sprite variables
 #### Sprite.x
@@ -802,7 +802,7 @@ Sprite(double x,
 ```
 Creates a new sprite with the given attributes.
 
-**Parameters:**
+**Parameters:** 
 *x* - The x coordinate of the sprite.
 *y* - The x coordinate of the sprite.
 *width* - The width of the sprite.
@@ -818,12 +818,12 @@ boolean collisionBox(Sprite spr,
 ```
 Detects if the current sprite collides with another sprite within the box area.
 
-**Parameters:**
+**Parameters:** 
 *spr* - The sprite to compare if the collision is happening.
 *hotpotX* - The x coordinate hotspot.
 *hotpotY* - The y coordinate hotspot. If set, the collision will be detected against the hotspot instead of the whole sprite.
 
-**Returns:**
+**Returns:** 
 `true` if the current sprite collides with the comparing sprite, `false` otherwise.
 
 #### Sprite.collisionCircle
@@ -833,11 +833,11 @@ boolean collisionCircle(Sprite spr,
 ```
 Detects if the current sprite collides with another sprite within the circle area.
 
-**Parameters:**
+**Parameters:** 
 *spr* - The sprite to compare if the collision is happening.
 *inner* - If set true, and the sprites are rectangular instead of square, this function will compare the collision with the inner circle of the sprites instead of the outer one.
 
-**Returns:**
+**Returns:** 
 `true` if the current sprite collides with the comparing sprite, `false` otherwise.
 
 #### Sprite.collisionMap
@@ -848,12 +848,12 @@ long collisionMap(optional long type = null,
 ```
 Detects if the current sprite collides with a sprite of the World Map.
 
-**Parameters:**
+**Parameters:** 
 *type* - The type of the map sprite to compare against.
 *hotpotX* - The x coordinate hotspot.
 *hotpotY* - The y coordinate hotspot. If set, the collision will be detected against the hotspot instead of the whole sprite.
 
-**Returns:**
+**Returns:** 
 The position plus one of the closest World Map sprite colliding, or 0 if none. Because the lowest position might be 0, the returned value will be always bigger by one than the intended if the collision happens.
 
 #### Sprite.collisionMapEx
@@ -862,10 +862,10 @@ long collisionMapEx(long exception = null)
 ```
 Detects if the current sprite collides with any sprite of the World Map, except the one received in the parameter. This function is specially useful when comparing a World Map sprite against the others.
 
-**Parameters:**
+**Parameters:** 
 *exception* - The position of the sprite not to be compared against in this function.
 
-**Returns:**
+**Returns:** 
 The position plus one of the closest World Map sprite colliding except the one received, or 0 otherwise. Because the lowest position might be 0, the returned value will be always bigger by one than the intended if the collision happens.
 
 #### Sprite.collisionMapRange
@@ -878,14 +878,14 @@ long collisionMapRange(long typeMin,
 ```
 Detects if the current sprite collides with a sprite of the World Map, within the type range from typeMin to typeMax.
 
-**Parameters:**
+**Parameters:** 
 *typeMin* - The lowest type of the map sprite to compare against.
 *typeMax* - The greatest type of the map sprite to compare against.
 *hotpotX* - The x coordinate hotspot.
 *hotpotY* - The y coordinate hotspot. If set, the collision will be detected against the hotspot instead of the whole sprite.
 *exception* - The position of the sprite not to be compared against in this function.
 
-**Returns:**
+**Returns:** 
 The position plus one of the closest World Map sprite colliding withing the range, or 0 otherwise. Because the lowest position might be 0, the returned value will be always bigger by one than the intended if the collision happens.
 
 
@@ -899,14 +899,14 @@ long collisionMapSwitch(long type,
 ```
 Detects if the current sprite collides with a sprite of the World Map, with the type received, and if true, it will switch it's value with newType. If newType is 0, it will remove the sprite instead.
 
-**Parameters:**
+**Parameters:** 
 *type* - The type of the map sprite to compare against.
 *newType* - The new type of the map sprite if the collision happens.
 *hotpotX* - The x coordinate hotspot.
 *hotpotY* - The y coordinate hotspot. If set, the collision will be detected against the hotspot instead of the whole sprite.
 *exception* - The position of the sprite not to be compared against in this function.
 
-**Returns:**
+**Returns:** 
 The position plus one of the closest World Map sprite colliding of the type received, or 0 otherwise. If `newType` is 0, it will return instead the original sprite type of the closest removed sprite, as the sprite itself won't existe anymore, and so, the position wouldn't be useful after this function is executed.
 
 #### Sprite.collisionPoint
@@ -916,11 +916,11 @@ boolean collisionPoint(double x,
 ```
 Detects if the current sprite collides with the specified point.
 
-**Parameters:**
+**Parameters:** 
 *x* - The x coordinate of the point to compare.
 *y* - The y coordinate of the point to compare.
 
-**Returns:**
+**Returns:** 
 `true` if the current sprite collides with the comparing point, `false` otherwise.
 
 
@@ -933,7 +933,7 @@ void drawSprite(CanvasRenderingContext2D ctx,
 ```
 Draws the sprite on the given `CanvasRenderingContext2D`. If no image is specified, this function will draw the sprite collision bounds.
 
-**Parameters:**
+**Parameters:** 
 *ctx* - The `CanvasRenderingContext2D` where the sprite will be drawn.
 *image* - The specified image to be drawn.
 *offsetX* - The offset in the x coordinate to move the image from the sprite.
@@ -946,11 +946,11 @@ double getDistance(Sprite spr,
 ```
 Calculates the distance between the current sprite and the given sprite.
 
-**Parameters:**
+**Parameters:** 
 *spr* - The sprite to get the distance from.
 *inner* - If set true, and the sprites are rectangular instead of square, this function will compare the distance with the inner circle of the sprites instead of the outer one.
 
-**Returns:**
+**Returns:** 
 The distance in pixels between the two sprites.
 
 #### Sprite.getAngle
@@ -959,7 +959,7 @@ double getAngle(void)
 ```
 Gets the moving angle of the current sprite, given his `vx` and `vy` values.
 
-**Returns:**
+**Returns:** 
 The moving angle of the current sprite in degrees.
 
 ```idl
@@ -967,10 +967,10 @@ double getAngle(Sprite spr)
 ```
 Calculates the angle between the current sprite and the given sprite.
 
-**Parameters:**
+**Parameters:** 
 *spr* - The sprite to get the angle from.
 
-**Returns:**
+**Returns:** 
 The angle in degrees between the two sprites.
 
 #### Sprite.getCenter
@@ -979,7 +979,7 @@ Point getCenter(void)
 ```
 Calculates the center of the sprite, considering the sprite scale.
 
-**Returns:**
+**Returns:** 
 A Pointer with the center of the sprite in the x a y coordinates.
 
 #### Sprite.getCenterX
@@ -988,7 +988,7 @@ double getCenterX(void)
 ```
 Calculates the center of the sprite in the x coordinate, considering the sprite scale.
 
-**Returns:**
+**Returns:** 
 The center of the sprite in the x coordinate.
 
 #### Sprite.getCenterY
@@ -997,7 +997,7 @@ double getCenterY(void)
 ```
 Calculates the center of the sprite in the y coordinate, considering the sprite scale.
 
-**Returns:**
+**Returns:** 
 The center of the sprite in the y coordinate.
 
 #### Sprite.getDiameter
@@ -1006,10 +1006,10 @@ double getDiameter(optional boolean inner = false)
 ```
 Calculates the diameter of the sprite, considering the sprite scale.
 
-**Parameters:**
+**Parameters:** 
 *inner* - If set true, and the sprite is rectangular instead of square, this function will return the diameter of the inner circle of the sprite instead of the outer one.
 
-**Returns:**
+**Returns:** 
 The diameter of the sprite.
 
 #### Sprite.getSpeed
@@ -1018,7 +1018,7 @@ double getSpeed(void)
 ```
 Gets the moving speed of the current sprite, given his `vx` and `vy` values.
 
-**Returns:**
+**Returns:** 
 The moving speed of the current sprite in pixels.
 
 #### Sprite.getWidth
@@ -1027,7 +1027,7 @@ double getWidth(void)
 ```
 Calculates the width of the sprite, considering the sprite scale.
 
-**Returns:**
+**Returns:** 
 The width of the sprite.
 
 #### Sprite.getHeight
@@ -1036,7 +1036,7 @@ double getHeight(void)
 ```
 Calculates the height of the sprite, considering the sprite scale.
 
-**Returns:**
+**Returns:** 
 The height of the sprite.
 
 #### Sprite.move
@@ -1064,7 +1064,7 @@ void setDirection(double angle,
 ```
 Changes the sprite direction.
 
-**Parameters:**
+**Parameters:** 
 *angle* - The new moving angle of the sprite.
 *speed* - The new moving speed of the sprite.
 
@@ -1074,7 +1074,7 @@ void setHealth(long health)
 ```
 Changes the sprite original health and fills the health to the top.
 
-**Parameters:**
+**Parameters:** 
 *health* - The new health of the sprite.
 
 #### Sprite.setOrigin
@@ -1084,7 +1084,7 @@ void setOrigin(double x,
 ```
 Changes the sprite origin to the new given point.
 
-**Parameters:**
+**Parameters:** 
 *x* - The x coordinate of the new origin point.
 *y* - The y coordinate of the new origin point.
 
@@ -1095,25 +1095,25 @@ void setPosition(double x,
 ```
 Moves the sprite to the new position.
 
-**Parameters:**
+**Parameters:** 
 *x* - The x coordinate of the new position.
 *y* - The y coordinate of the new position.
 
 ## SpriteSheet
 This pseudo-class offers an easy and simple way to make a sprite sheet with the same width and height for each sprite on it. Also, with the `drawSpriteFromArea` function, you can use this pseudo-class to draw specific areas in the image, independent from the static width and height, for more optimized games.
 
-**[Variables summary](#spritesheet-variables)**
-|Image	|[img](#spritesheet.img)	|
+**[Variables summary](#spritesheet-variables)** 
+| Image	| [img](#spritesheetimg)	|
 
-**[Contructor summary](#spritesheet-constructor)**
-|[SpriteSheet(Image img, long spriteWidth, optional long spriteHeight)](#spritesheet.spritesheet)|
+**[Contructor summary](#spritesheet-constructor)** 
+| [SpriteSheet(Image img, long spriteWidth, optional long spriteHeight)](#spritesheetspritesheet)	|
 
-**[Functions summary](#spritesheet-functions)**
-|void	|[draw(CanvasRenderingContext2D ctx, double x, double y, optional long spriteNumber)](#spritesheet.draw)	|
-|void	|[draw(CanvasRenderingContext2D ctx, double x, double y, optional long col, optional long row)](#spritesheet.draw)	|
-|void	|[drawArea(CanvasRenderingContext2D ctx, double x, double y, long areaX, long areaY, long areaWidth, long areaHeight)](#spritesheet.drawarea)	|
-|void	|[drawSprite(CanvasRenderingContext2D ctx, Sprite spr, optional long col, optional long row, optional double offsetX, optional double offsetY)](#spritesheet.drawsprite)	|
-|void	|[drawSpriteFromArea(CanvasRenderingContext2D ctx, Sprite spr, long areaX, long areaY, long areaWidth, long areaHeight, optional double offsetX, optional double offsetY)](#spritesheet.drawspritefromarea)	|
+**[Functions summary](#spritesheet-functions)** 
+| void	| [draw(CanvasRenderingContext2D ctx, double x, double y, optional long spriteNumber)](#spritesheetdraw)	|
+| void	| [draw(CanvasRenderingContext2D ctx, double x, double y, optional long col, optional long row)](#spritesheetdraw)	|
+| void	| [drawArea(CanvasRenderingContext2D ctx, double x, double y, long areaX, long areaY, long areaWidth, long areaHeight)](#spritesheetdrawarea)	|
+| void	| [drawSprite(CanvasRenderingContext2D ctx, Sprite spr, optional long col, optional long row, optional double offsetX, optional double offsetY)](#spritesheetdrawsprite)	|
+| void	| [drawSpriteFromArea(CanvasRenderingContext2D ctx, Sprite spr, long areaX, long areaY, long areaWidth, long areaHeight, optional double offsetX, optional double offsetY)](#spritesheetdrawspritefromarea)	|
 
 ### SpriteSheet variables
 #### SpriteSheet.img
@@ -1131,7 +1131,7 @@ SpriteSheet(Image img,
 ```
 Creates a new sprite sheet with the given attributes.
 
-**Parameters:**
+**Parameters:** 
 *img* - The image to be used by the sprite sheet.
 *spriteWidth* - The width of the sprites within the sprite sheet.
 *spriteHeight* - The height of the sprites within the sprite sheet. If not set, it will take the value of `spriteWidth`.
@@ -1146,7 +1146,7 @@ void draw(CanvasRenderingContext2D ctx,
 ```
 Draws the selected sprite image in the given coordinates.
 
-**Parameters:**
+**Parameters:** 
 *ctx* - The `CanvasRenderingContext2D` where the sprite image will be drawn.
 *x* - The x coordinate where the image will be drawn.
 *y* - The y coordinate where the image will be drawn.
@@ -1161,7 +1161,7 @@ void draw(CanvasRenderingContext2D ctx,
 ```
 Draws the selected sprite image in the given coordinates.
 
-**Parameters:**
+**Parameters:** 
 *ctx* - The `CanvasRenderingContext2D` where the sprite image will be drawn.
 *x* - The x coordinate where the image will be drawn.
 *y* - The y coordinate where the image will be drawn.
@@ -1180,7 +1180,7 @@ void drawArea(CanvasRenderingContext2D ctx,
 ```
 Draws the selected area of the sprite sheet in the given coordinates.
 
-**Parameters:**
+**Parameters:** 
 *ctx* - The `CanvasRenderingContext2D` where the sprite image will be drawn.
 *x* - The x coordinate where the image will be drawn.
 *y* - The y coordinate where the image will be drawn.
@@ -1200,7 +1200,7 @@ void drawSprite(CanvasRenderingContext2D ctx,
 ```
 Draws the given sprite from the sprite image selected in the sprite sheet.
 
-**Parameters:**
+**Parameters:** 
 *ctx* - The `CanvasRenderingContext2D` where the sprite will be drawn.
 *spr* - The sprite to be drawn
 *col* - The column of the sprite image to draw. If none is specified, it will return the first one.
@@ -1221,7 +1221,7 @@ void drawSpriteFromArea(CanvasRenderingContext2D ctx,
 ```
 Draws the given sprite from the area selected in the sprite sheet.
 
-**Parameters:**
+**Parameters:** 
 *ctx* - The `CanvasRenderingContext2D` where the sprite will be drawn.
 *spr* - The sprite to be drawn
 *areaX* - The x coordinate in the sprite sheet from where the image will be drawn.
@@ -1232,20 +1232,20 @@ Draws the given sprite from the area selected in the sprite sheet.
 *offsetY* - The offset in the y coordinate to move the image from the sprite.
 
 ## SpriteVector
-**extends Array**
+**extends Array** 
 This pseudo-class contains an array of sprites to be manipulated as one group.
 
-**[Contructor summary](#spritevector-constructor)**
-|[SpriteVector(void)](#spritevector.spritevector)	|
+**[Contructor summary](#spritevector-constructor)** 
+| [SpriteVector(void)](#spritevectorspritevector)	|
 
-**[Functions summary](#spritevector-functions)**
-|void	|[addSprite(Sprite spr)](#spritevector.addsprite)	|
-|void	|[addSprite(double x, double y, double width, optional double height, optional long type)](#spritevector.addsprite)	|
-|void	|[addMap(long map, long cols, double width, optional double height, optional SpriteVector masterSprites)](#spritevector.addmap)	|
-|boolean	|[collisionBox(Sprite spr)](#spritevector.collisionbox)	|
-|void	|[drawSprites(CanvasRenderingContext2D ctx, optional Image img, optional double offsetX, optional double offsetY)](#spritevector.drawsprites)	|
-|Sprite	|[getSprite(long position)](#spritevector.getsprite)	|
-|void	|[move(void)](#spritevector.move)	|
+**[Functions summary](#spritevector-functions)** 
+| void	| [addSprite(Sprite spr)](#spritevectoraddsprite)	|
+| void	| [addSprite(double x, double y, double width, optional double height, optional long type)](#spritevectoraddsprite)	|
+| void	| [addMap(long map, long cols, double width, optional double height, optional SpriteVector masterSprites)](#spritevectoraddmap)	|
+| boolean	| [collisionBox(Sprite spr)](#spritevectorcollisionbox)	|
+| void	| [drawSprites(CanvasRenderingContext2D ctx, optional Image img, optional double offsetX, optional double offsetY)](#spritevectordrawsprites)	|
+| Sprite	| [getSprite(long position)](#spritevectorgetsprite)	|
+| void	| [move(void)](#spritevectormove)	|
 
 ### SpriteVector constructor
 #### SpriteVector.SpriteVector
@@ -1261,7 +1261,7 @@ addSprite(Sprite spr)
 ```
 Pushes the given sprite into the sprite vector.
 
-**Parameters:**
+**Parameters:** 
 *spr* - The sprite to be pushed into the sprite vector
 
 ```idl
@@ -1273,7 +1273,7 @@ void addSprite(double x,
 ```
 Creates a new sprite with the given attributes and then pushes it into the sprite vector.
 
-**Parameters:**
+**Parameters:** 
 *x* - The x coordinate of the sprite.
 *y* - The x coordinate of the sprite.
 *width* - The width of the sprite.
@@ -1290,7 +1290,7 @@ void addMap(long map[],
 ```
 Creates a group of sprites from the map array, setting them the type value of the corresponding map array value.
 
-**Parameters:**
+**Parameters:** 
 *map* - A numeric array with the sprite positions. Zeros will be ignored.
 *cols* - The number of columns per row in the numeric map array.
 *width* - The width of the sprites.
@@ -1303,10 +1303,10 @@ boolean collisionBox(Sprite spr)
 ```
 Detects if the specified sprite collides with any of the sprites inside the sprite vector within the box area.
 
-**Parameters:**
+**Parameters:** 
 *spr* - The sprite to compare if the collision is happening.
 
-**Returns:**
+**Returns:** 
 `true` if any of the sprites inside the sprite vector collides with the given sprite, `false` otherwise.
 
 #### SpriteVector.drawSprites
@@ -1318,7 +1318,7 @@ void drawSprites(CanvasRenderingContext2D ctx,
 ```
 Draws all the sprites in the sprite vector on the given `CanvasRenderingContext2D`.
 
-**Parameters:**
+**Parameters:** 
 *ctx* - The `CanvasRenderingContext2D` where the sprites will be drawn.
 *image* - The specified image to be drawn. If you send an array of images instead of just one image, the image drawn will be that in the place order of the sprite type.
 *offsetX* - The offset in the x coordinate to move the image from the sprites.
@@ -1330,10 +1330,10 @@ Sprite getSprite(long position)
 ```
 Gets the sprite in the given position inside the sprite vector. Same as calling `spritevector[position]`.
 
-**Parameters:**
+**Parameters:** 
 *position* - The position of the sprite you want to retrieve in the sprite vector.
 
-**Returns:**
+**Returns:** 
 The sprite in the given position inside the sprite vector.
 
 #### SpriteVector.move
@@ -1348,12 +1348,12 @@ static Camera()
 ```
 Camera is an static pseudo-class which holds the coordinates from where the game will start to be drawn.
 
-**[Variables summary](#camera-variables)**
-|long	|[x](#camera.x)	|
-|long	|[y](#camera.y)	|
+**[Variables summary](#camera-variables)** 
+| long	| [x](#camerax)	|
+| long	| [y](#cameray)	|
 
-**[Functions summary](#camera-functions)**
-|void	|[focus(Sprite spr, optional double slide, optional double offsetX, optional double offsetY)](#camera.focus)	|
+**[Functions summary](#camera-functions)** 
+| void	| [focus(Sprite spr, optional double slide, optional double offsetX, optional double offsetY)](#camerafocus)	|
 
 ### Camera variables
 #### Camera.x
@@ -1378,7 +1378,7 @@ void focus(Sprite spr,
 ```
 The camera centers on the given sprite.
 
-**Parameters:**
+**Parameters:** 
 *spr* - The sprite to which the camera will center.
 *slide* - If this value is bigger than 0, the camera will slowly move `slide` pixels each loop until the sprite is centered.
 *offsetX* - Horizontal distance from the world border to limit the camera movement. Negative values allow the camera to move beyond the world horizontal border.
@@ -1390,12 +1390,12 @@ static Mouse()
 ```
 Mouse is an static pseudo-class which handles the coordinates of the mouse, respective to the game.
 
-**[Variables summary](#mouse-variables)**
-|long	|[x](#mouse.x)	|
-|long	|[y](#mouse.y)	|
+**[Variables summary](#mouse-variables)** 
+| long	| [x](#mousex)	|
+| long	| [y](#mousey)	|
 
-**[Functions summary](#mouse-functions)**
-|void	|[draw(CanvasRenderingContext2D ctx)](#mouse.draw)	|
+**[Functions summary](#mouse-functions)** 
+| void	| [draw(CanvasRenderingContext2D ctx)](#mousedraw)	|
 
 ### Mouse variables
 #### Mouse.x
@@ -1417,7 +1417,7 @@ void draw(CanvasRenderingContext2D ctx)
 ```
 Draws in the given `CanvasRenderingContext2D` a small red sight where the mouse is, respective to the game (Useful for debugging purposes. Should be the same to the mouse cursor all the time).
 
-**Parameters:**
+**Parameters:** 
 *ctx* - The `CanvasRenderingContext2D` where the mouse position will be drawn.
 
 ## Util
@@ -1426,11 +1426,11 @@ static Util()
 ```
 Util is an static pseudo-class with many helpful functions for your games.
 
-**[Functions summary](#util-functions)**
-|void	|[fillTile(CanvasRenderingContext2D ctx, Image img, optional double x, optional double y, optional boolean repeatX, optional boolean repeatY)](#util.filltile)	|
-|double	|[getAngle(double x1, double y1, double x2, double y2)](#util.getangle)	|
-|Audio	|[getAudio(DOMString str)](#util.getaudio)	|
-|Image	|[getImage(DOMString str)](#util.getimage)	|
+**[Functions summary](#util-functions)** 
+| void	| [fillTile(CanvasRenderingContext2D ctx, Image img, optional double x, optional double y, optional boolean repeatX, optional boolean repeatY)](#utilfilltile)	|
+| double	| [getAngle(double x1, double y1, double x2, double y2)](#utilgetangle)	|
+| Audio	| [getAudio(DOMString str)](#utilgetaudio)	|
+| Image	| [getImage(DOMString str)](#utilgetimage)	|
 
 ### Util functions
 #### Util.fillTile
@@ -1444,7 +1444,7 @@ void fillTile(CanvasRenderingContext2D ctx,
 ```
 Fills the screen with a tile of the given image.
 
-**Parameters:**
+**Parameters:** 
 *ctx* - The `CanvasRenderingContext2D` where the tile will be drawn.
 *img* - The specified image to be drawn as a tile.
 *x* - The x coordinate where the tile will start to draw. Can be a negative value.
@@ -1461,13 +1461,13 @@ double getAngle(double x1,
 ```
 Calculates the angle between the two points given.
 
-**Parameters:**
+**Parameters:** 
 *x1* - The x coordinate of the first point.
 *y1* - The y coordinate of the first point.
 *x2* - The x coordinate of the second point.
 *y2* - The y coordinate of the second point.
 
-**Returns**
+**Returns** 
 The angle between the two points.
 
 #### Util.getAudio
@@ -1476,10 +1476,10 @@ Audio getAudio(DOMString str)
 ```
 Detects if the browser supports MPEG-like or OGG audio formats, and returns the audio that best fits the specifications in the browser. For this function to work, you must have both your MPEG-like and your OGG audio with "oga" extension in the same folder.
 
-**Parameters:**
+**Parameters:** 
 *str* - The string of the path where the audio is located.
 
-**Returns**
+**Returns** 
 If the browser supports OGG, it will return the Audio in the specified path, but with the extension changed to "oga". Else, it will return the Audio in the specified path as sent in the string.
 
 #### Util.getImage
@@ -1488,27 +1488,27 @@ Image getImage(DOMString str)
 ```
 Creates and returns a new image with the specified path in the string.
 
-**Parameters:**
+**Parameters:** 
 *str* - The string of the path where the image is located.
 
-**Returns**
+**Returns** 
 A new image with the specified path in the string.
 
 ## World
 World is an static pseudo-class containing all the elements for the current world in the screen.
 
-**[Variables summary](#world-variables)**
-|long	|[width](#world.width)	|
-|long	|[height](#world.height)	|
-|SpriteVector	|[map](#world.map)	|
-|boolean	|[loopX](#world.loopX)	|
-|boolean	|[loopY](#world.loopY)	|
+**[Variables summary](#world-variables)** 
+| long	| [width](#worldwidth)	|
+| long	| [height](#worldheight)	|
+| SpriteVector	| [map](#worldmap)	|
+| boolean	| [loopX](#worldloopX)	|
+| boolean	| [loopY](#worldloopY)	|
 
-**[Functions summary](#world-functions)**
-|void	|[drawMap(CanvasRenderingContext2D ctx, optional Image img, optional boolean deviation)](#world.drawMap)	|
-|void	|[drawMap(CanvasRenderingContext2D ctx, optional SpriteSheet spritesheet, optional boolean deviation)](#world.drawMap)	|
-|void	|[setMap(long map, long cols, double width, optional double height)](#world.setmap)	|
-|void	|[setSize(double width, double height)](#world.setsize)	|
+**[Functions summary](#world-functions)** 
+| void	| [drawMap(CanvasRenderingContext2D ctx, optional Image img, optional boolean deviation)](#worlddrawMap)	|
+| void	| [drawMap(CanvasRenderingContext2D ctx, optional SpriteSheet spritesheet, optional boolean deviation)](#worlddrawMap)	|
+| void	| [setMap(long map, long cols, double width, optional double height)](#worldsetmap)	|
+| void	| [setSize(double width, double height)](#worldsetsize)	|
 
 ### World variables
 #### World.width
@@ -1550,7 +1550,7 @@ void drawMap(CanvasRenderingContext2D ctx,
 ```
 Draws the world map with the given images.
 
-**Parameters:**
+**Parameters:** 
 *ctx* - The `CanvasRenderingContext2D` where the map will be drawn.
 *img* - The image array from where the map images will be drawn. If only one image is specified, the whole map will be drawn with that image. If no image is specified, this function will draw only the map block boundaries.
 *deviation* - Activates var1 in each map block as a deviation. This allow map blocks to be drawn as a different map block that the one it represent (As many more or less as the value in var1). This technique is good for hidden blocks, temporal effects or tricky blocks.
@@ -1562,7 +1562,7 @@ void drawMap(CanvasRenderingContext2D ctx,
 ```
 Draws the world map with the given sprite sheet.
 
-**Parameters:**
+**Parameters:** 
 *ctx* - The `CanvasRenderingContext2D` where the map will be drawn.
 *spritesheet* - The sprite sheet from where the map images will be drawn. If no sprite sheet is specified, this function will draw only the map block boundaries.
 *deviation* -  Activates var1 in each map block as a deviation. This allow map blocks to be drawn as a different map block that the one it represent (As many more or less as the value in var1). This technique is good for hidden blocks, temporal effects or tricky blocks.
@@ -1576,7 +1576,7 @@ void setMap(long map[],
 ```
 Sets the world map from a numeric map array. It will set the width and height of the world as the total area containing all the blocks in the map.
 
-**Parameters:**
+**Parameters:** 
 *map* - A numeric array with the map blocks positions. Zeros will be ignored.
 *cols* - The number of columns per row in the numeric map array.
 *width* - The width of each block in the map.
@@ -1589,13 +1589,13 @@ void setSize(double width,
 ```
 Manually sets the size of the current world.
 
-**Parameters:**
+**Parameters:** 
 *width* - The new width of the world.
 *height* - The new height of the world.
 
 ## cojsge_defs.js
 
-To make easier some tasks with COJSGE, there is a second optional file included, called cojsge_defs. It includes definitions to the values of the keyboard keys, the mouse buttons and the fullscreen modes to set in the COGJSGE Game Class on it's creation. As you can access the numeric values directly, these definitions can make the coding of your game an easier task.
+To make easier some tasks with COJSGE, there is a second optional file included, called `cojsge_defs`. It includes definitions to the values of the keyboard keys, the mouse buttons and the fullscreen modes to set in the COGJSGE Game Class on it's creation. As you can access the numeric values directly, these definitions can make the coding of your game an easier task.
 
 Feel free to explore the file, so you can know the options you have when making a game, or as a cheat code to the common numeric values of the mouse and keyboard buttons.
 
