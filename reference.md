@@ -208,6 +208,7 @@ As it is recomended to use personal SpriteSheets for more optimized games, this 
 | long	| [framesPerImage](#animationframesperimage)	|
 
 | **[Contructor summary](#animation-constructor)** |
+| --- |
 | [Animation(Image image, long frameWidth, optional long frameHeight, optional long framesPerImage)](#animationanimation)	|
 
 | | **[Functions summary](#animation-functions)** |
@@ -873,7 +874,7 @@ The position plus one of the closest World Map sprite colliding, or 0 if none. B
 
 #### Sprite.collisionMapEx
 ```idl
-long collisionMapEx(long exception = null)
+long collisionMapEx(long exception)
 ```
 Detects if the current sprite collides with any sprite of the World Map, except the one received in the parameter. This function is specially useful when comparing a World Map sprite against the others.
 
