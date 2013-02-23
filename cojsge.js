@@ -326,16 +326,16 @@ function Button(_x,_y,_width,_height){
 	
 	this.mouseOver=function(){
 		return(
-			this.x<Mouse.x&&this.x+this.width>Mouse.x&&
-			this.y<Mouse.y&&this.y+this.height>Mouse.y
+			this.x+Camera.x<Mouse.x&&this.x+this.width>Mouse.x&&
+			this.y+Camera.y<Mouse.y&&this.y+this.height>Mouse.y
 		);
 	}
 	
 	this.mouseDown=function(){
 		return(
 			pressing[1]&&
-			this.x<Mouse.x&&this.x+this.width>Mouse.x&&
-			this.y<Mouse.y&&this.y+this.height>Mouse.y
+			this.x+Camera.x<Mouse.x&&this.x+this.width>Mouse.x&&
+			this.y+Camera.y<Mouse.y&&this.y+this.height>Mouse.y
 		);
 	}
 	
@@ -344,11 +344,18 @@ function Button(_x,_y,_width,_height){
 			if(img!=null){
 				ox=(isNaN(ox))?0:ox;
 				oy=(isNaN(oy))?0:oy;
-				ctx.drawImage(img,this.x+ox,this.y+oy);
+				ctx.drawImage(img,this.x+Camera.x+ox,this.y+Camera.y+oy);
 			}
 			if(img==null||screenDebug){
-				ctx.strokeStyle='#fff';
-				ctx.strokeRect(this.x,this.y,this.width,this.height);
+				if(this.mouseOver()){
+					if(pressing[1])
+						ctx.strokeStyle='#fff';
+					else
+						ctx.strokeStyle='#0ff';
+				}
+				else
+					ctx.strokeStyle='#00f';
+				ctx.strokeRect(this.x+Camera.x,this.y+Camera.y,this.width,this.height);
 			}
 		}
 		else if(window.cosole)console.error('Data missing in Button.draw(ctx[,img,offsetX,offsetY])');
@@ -1108,6 +1115,15 @@ Util=new function(){
 			return angle;
 		}
 		else if(window.cosole)console.error('Data missing in Util.getAngle(x1,y1,x2,y2)');
+	}
+
+	this.getDistance=function(x1,y1,x2,y2){
+		if(y2!=null){
+			var dx=x1-x2;
+			var dy=y1-y2;
+			return (Math.sqrt(dx*dx+dy*dy));
+		}
+		else if(window.cosole)console.error('Data missing in Util.getDistance(x1,y1,x2,y2)');
 	}
 
 	this.getImage=function(str){

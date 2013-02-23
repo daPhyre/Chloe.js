@@ -143,12 +143,11 @@ COJSGE extends the `Array` elements, giving them the properties `insert(long pos
 ## Game
 The `Game` pseudo-class creates a new game assigned to the canvas with id "canvas", if no other ID is specified. This class is needed to start the game.
 
-**[Contructor summary](#game-constructor)**  
+| **[Contructor summary](#game-constructor)** |
 | --- |
 | [Game(optional DOMString canvasId, optional boolean autoFull, optional long fullMode)](#gamegame)	|
 
-**[Functions summary](#game-functions)**
-
+| | **[Functions summary](#game-functions)** |
 | --- | --- |
 | void	| [getScreenshot(void)](#gamegetscreenshot)	|
 | void	| [setBackground(DOMString color, optional DOMString image, optional boolean fixed)](#gamesetbackground)	|
@@ -202,20 +201,16 @@ Sets the time between calls to the `game` function.
 ## Animation
 As it is recomended to use personal SpriteSheets for more optimized games, this pseudo-class offers an easy and simple way to make animations in your game.
 
-**[Variables summary](#animation-variables)**  
-| type | function |
+| | **[Variables summary](#animation-variables)** |
 | --- | --- |
 | Image	| [images](#animationimages)	|
 | long	| [currentFrame](#animationcurrentframe)	|
 | long	| [framesPerImage](#animationframesperimage)	|
 
-**[Contructor summary](#animation-constructor)**  
-
+| **[Contructor summary](#animation-constructor)** |
 | [Animation(Image image, long frameWidth, optional long frameHeight, optional long framesPerImage)](#animationanimation)	|
 
-**[Functions summary](#animation-functions)**  
-
-| type | function |
+| | **[Functions summary](#animation-functions)** |
 | --- | --- |
 | void	| [addFrame(Image img)](#animationaddframe)	|
 | void	| [draw(CanvasRenderingContext2D ctx, double x, double y, optional long row)](#animationdraw)	|
@@ -349,13 +344,13 @@ Moves to the previous frame in the animation and returns current frame. This fun
 The current frame after moving backward.
 
 ## Button
-This pseudo-class helps with the creation of a simple button, interactive only with the mouse.
+This pseudo-class makes a simple button, interactive only with the mouse. Buttons position are always relative to screen position instead of world position.
 
-**[Contructor summary](#button-constructor)**  
+| **[Contructor summary](#button-constructor)** |
 | --- |
 | [Button(double x, double y, double width, double height)](#buttonbutton)	|
 
-**[Functions summary](#button-functions)**  
+| | **[Functions summary](#button-functions)** |
 | --- | --- |
 | boolean	| [mouseOver(void)](#buttonmouseover)	|
 | boolean	| [mouseDown(void)](#buttonmousedown)	|
@@ -414,7 +409,7 @@ Draws the button in the given `CanvasRenderingContext2D`. If no image is specifi
 ## Particle
 Creates a new particle to be managed with the particle system.
 
-**[Variables summary](#particle-variables)**  
+| | **[Variables summary](#particle-variables)** |
 | --- | --- |
 | double	| [x](#particlex)	|
 | double	| [y](#particley)	|
@@ -429,7 +424,7 @@ Creates a new particle to be managed with the particle system.
 | DOMString	| [color](#particlecolor)	|
 | DOMString	| [colorList](#particlecolorList)	|
 
-**[Contructor summary](#particle-constructor)**  
+| **[Contructor summary](#particle-constructor)** |
 | --- |
 | [Particle(double x, double y, double diameter, long life, double speed, double angle, DOMString colorStart, optional DOMString colorEnd)](#particleparticle)	|
 
@@ -534,16 +529,16 @@ Creates a new particle with the given attributes.
 **extends Array**  
 Contains an array of particles to be manipulated as one system.
 
-**[Variables summary](#particlesystem-variables)**  
+| | **[Variables summary](#particlesystem-variables)** |
 | --- | --- |
 | double	| [gravity](#particlesystemgravity)	|
 | double	| [wind](#particlesystemwind)	|
 
-**[Contructor summary](#particlesystem-constructor)**  
+| **[Contructor summary](#particlesystem-constructor)** |
 | --- |
 | [ParticleSystem(void)](#particlesystemparticlesystem)	|
 
-**[Functions summary](#particlesystem-functions)**  
+| | **[Functions summary](#particlesystem-functions)** |
 | --- | --- |
 | void	| [addParticle(Particle particle)](#particlesystemaddParticle)	|
 | void	| [addParticle(double x, double y, double diameter, long life, double speed, double angle, DOMString colorStart, optional DOMString colorEnd)](#particlesystemaddParticle)	|
@@ -642,7 +637,7 @@ Draws the particles within the particle system as lines, from the origin to thei
 ## Sprite
 This pseudo-class creates an element to be used in the game, interactive with other sprites.
 
-**[Variables summary](#sprite-variables)**  
+| | **[Variables summary](#sprite-variables)** |
 | --- | --- |
 | double	| [x](#spritex)	|
 | double	| [y](#spritey)	|
@@ -664,11 +659,11 @@ This pseudo-class creates an element to be used in the game, interactive with ot
 | boolean	| [flag1](#spriteflag1)	|
 | boolean	| [flag2](#spriteflag2)	|
 
-**[Contructor summary](#sprite-constructor)**  
+| **[Contructor summary](#sprite-constructor)** |
 | --- |
 | [Sprite(double x, double y, double width, optional double height, optional long type)](#spritesprite)	|
 
-**[Functions summary](#sprite-functions)**  
+| | **[Functions summary](#sprite-functions)** |
 | --- | --- |
 | boolean	| [collisionBox(Sprite spr, optional double hotspotX, optional double hotspotY)](#spritecollisionbox)	|
 | boolean	| [collisionCircle(Sprite spr, optional boolean inner)](#spritecollisioncircle)	|
@@ -1120,15 +1115,15 @@ Moves the sprite to the new position.
 ## SpriteSheet
 This pseudo-class offers an easy and simple way to make a sprite sheet with the same width and height for each sprite on it. Also, with the `drawSpriteFromArea` function, you can use this pseudo-class to draw specific areas in the image, independent from the static width and height, for more optimized games.
 
-**[Variables summary](#spritesheet-variables)**  
+| | **[Variables summary](#spritesheet-variables)** |
 | --- | --- |
 | Image	| [img](#spritesheetimg)	|
 
-**[Contructor summary](#spritesheet-constructor)**  
+| **[Contructor summary](#spritesheet-constructor)** |
 | --- |
 | [SpriteSheet(Image img, long spriteWidth, optional long spriteHeight)](#spritesheetspritesheet)	|
 
-**[Functions summary](#spritesheet-functions)**  
+| | **[Functions summary](#spritesheet-functions)** |
 | --- | --- |
 | void	| [draw(CanvasRenderingContext2D ctx, double x, double y, optional long spriteNumber)](#spritesheetdraw)	|
 | void	| [draw(CanvasRenderingContext2D ctx, double x, double y, optional long col, optional long row)](#spritesheetdraw)	|
@@ -1256,11 +1251,11 @@ Draws the given sprite from the area selected in the sprite sheet.
 **extends Array**  
 This pseudo-class contains an array of sprites to be manipulated as one group.
 
-**[Contructor summary](#spritevector-constructor)**  
+| **[Contructor summary](#spritevector-constructor)** |
 | --- |
 | [SpriteVector(void)](#spritevectorspritevector)	|
 
-**[Functions summary](#spritevector-functions)**  
+| | **[Functions summary](#spritevector-functions)** |
 | --- | --- |
 | void	| [addSprite(Sprite spr)](#spritevectoraddsprite)	|
 | void	| [addSprite(double x, double y, double width, optional double height, optional long type)](#spritevectoraddsprite)	|
@@ -1371,12 +1366,12 @@ static Camera()
 ```
 Camera is an static pseudo-class which holds the coordinates from where the game will start to be drawn.
 
-**[Variables summary](#camera-variables)**  
+| | **[Variables summary](#camera-variables)** |
 | --- | --- |
 | long	| [x](#camerax)	|
 | long	| [y](#cameray)	|
 
-**[Functions summary](#camera-functions)**  
+| | **[Functions summary](#camera-functions)** |
 | --- | --- |
 | void	| [focus(Sprite spr, optional double slide, optional double offsetX, optional double offsetY)](#camerafocus)	|
 
@@ -1415,12 +1410,12 @@ static Mouse()
 ```
 Mouse is an static pseudo-class which handles the coordinates of the mouse, respective to the game.
 
-**[Variables summary](#mouse-variables)**  
+| | **[Variables summary](#mouse-variables)** |
 | --- | --- |
 | long	| [x](#mousex)	|
 | long	| [y](#mousey)	|
 
-**[Functions summary](#mouse-functions)**  
+| | **[Functions summary](#mouse-functions)** |
 | --- | --- |
 | void	| [draw(CanvasRenderingContext2D ctx)](#mousedraw)	|
 
@@ -1453,11 +1448,12 @@ static Util()
 ```
 Util is an static pseudo-class with many helpful functions for your games.
 
-**[Functions summary](#util-functions)**  
+| | **[Functions summary](#util-functions)** |
 | --- | --- |
 | void	| [fillTile(CanvasRenderingContext2D ctx, Image img, optional double x, optional double y, optional boolean repeatX, optional boolean repeatY)](#utilfilltile)	|
 | double	| [getAngle(double x1, double y1, double x2, double y2)](#utilgetangle)	|
 | Audio	| [getAudio(DOMString str)](#utilgetaudio)	|
+| double	| [getDistance(double x1, double y1, double x2, double y2)](#utilgetdistance)	|
 | Image	| [getImage(DOMString str)](#utilgetimage)	|
 
 ### Util functions
@@ -1498,6 +1494,24 @@ Calculates the angle between the two points given.
 **Returns**  
 The angle between the two points.
 
+#### Util.getDistance
+```idl
+double getDistance(double x1,
+				   double y1,
+				   double x2,
+				   double y2)
+```
+Calculates the distance between the two points given.
+
+**Parameters:**  
+*x1* - The x coordinate of the first point.  
+*y1* - The y coordinate of the first point.  
+*x2* - The x coordinate of the second point.  
+*y2* - The y coordinate of the second point.
+
+**Returns**  
+The distance between the two points.
+
 #### Util.getAudio
 ```idl
 Audio getAudio(DOMString str)
@@ -1525,7 +1539,7 @@ A new image with the specified path in the string.
 ## World
 World is an static pseudo-class containing all the elements for the current world in the screen.
 
-**[Variables summary](#world-variables)**  
+| | **[Variables summary](#world-variables)** |
 | --- | --- |
 | long	| [width](#worldwidth)	|
 | long	| [height](#worldheight)	|
@@ -1533,7 +1547,7 @@ World is an static pseudo-class containing all the elements for the current worl
 | boolean	| [loopX](#worldloopX)	|
 | boolean	| [loopY](#worldloopY)	|
 
-**[Functions summary](#world-functions)**  
+| | **[Functions summary](#world-functions)** |
 | --- | --- |
 | void	| [drawMap(CanvasRenderingContext2D ctx, optional Image img, optional boolean deviation)](#worlddrawMap)	|
 | void	| [drawMap(CanvasRenderingContext2D ctx, optional SpriteSheet spritesheet, optional boolean deviation)](#worlddrawMap)	|
