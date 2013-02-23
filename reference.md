@@ -147,7 +147,8 @@ The `Game` pseudo-class creates a new game assigned to the canvas with id "canva
 | --- |
 | [Game(optional DOMString canvasId, optional boolean autoFull, optional long fullMode)](#gamegame)	|
 
-**[Functions summary](#game-functions)**  
+**[Functions summary](#game-functions)**
+
 | --- | --- |
 | void	| [getScreenshot(void)](#gamegetscreenshot)	|
 | void	| [setBackground(DOMString color, optional DOMString image, optional boolean fixed)](#gamesetbackground)	|
@@ -202,16 +203,19 @@ Sets the time between calls to the `game` function.
 As it is recomended to use personal SpriteSheets for more optimized games, this pseudo-class offers an easy and simple way to make animations in your game.
 
 **[Variables summary](#animation-variables)**  
+| type | function |
 | --- | --- |
 | Image	| [images](#animationimages)	|
 | long	| [currentFrame](#animationcurrentframe)	|
 | long	| [framesPerImage](#animationframesperimage)	|
 
 **[Contructor summary](#animation-constructor)**  
-| --- |
+
 | [Animation(Image image, long frameWidth, optional long frameHeight, optional long framesPerImage)](#animationanimation)	|
 
 **[Functions summary](#animation-functions)**  
+
+| type | function |
 | --- | --- |
 | void	| [addFrame(Image img)](#animationaddframe)	|
 | void	| [draw(CanvasRenderingContext2D ctx, double x, double y, optional long row)](#animationdraw)	|
