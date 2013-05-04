@@ -2,11 +2,13 @@
  * Canvas Open JavaScript Game Engine
  * @author daPhyre
  * @since 0.1, Tu/12/Jul/11
- * @version 0.8, Sa/18/Jan/13
+ * @version 0.8.1, Sa/04/May/13
  */
+'use strict';
 var stage=null,ctx=null,lastPress=null,lastRelease=null;
 var isFullscreen=false,screenDebug=false;
-var pressing=new Array();
+var pressing=[];
+Math.DEG=Math.PI/180;
 Array.prototype.insert=function(i,element){this.splice(i,0,element);}
 Array.prototype.remove=function(i){return this.splice(i,1)[0];}
 Array.prototype.removeAll=function(){this.length=0;}
@@ -72,7 +74,7 @@ function Game(canvasId,autoFull,fullMode){
 
 	function run(){
 		//setTimeout(run,interval);
-		requestAnimFrame(run);
+		window.requestAnimFrame(run);
 		var now=new Date().getTime();
 		var dt=now-(time || now);
 		time=now;
@@ -166,7 +168,7 @@ function Game(canvasId,autoFull,fullMode){
 	}
 	
 	function MouseDown(evt){
-		MousePrevent(evt);
+		new MousePrevent(evt);
 		if(!pressing[evt.which])
 			lastPress=evt.which;
 		pressing[evt.which]=true;
@@ -183,14 +185,14 @@ function Game(canvasId,autoFull,fullMode){
 			Mouse.y=evt.pageY*stage.height/window.innerHeight;
 		}
 		else{
-			Mouse.x=parseInt(evt.pageX+document.body.scrollLeft-stage.offsetLeft)/gameScale;
-			Mouse.y=parseInt(evt.pageY+document.body.scrollTop-stage.offsetTop)/gameScale;
+			Mouse.x=~~(evt.pageX+document.body.scrollLeft-stage.offsetLeft)/gameScale;
+			Mouse.y=~~(evt.pageY+document.body.scrollTop-stage.offsetTop)/gameScale;
 		}
 	}
 }
 //	Animation.js
 function Animation(_img,_frameWidth,_frameHeight,_framesPerImage){
-	this.images=new Array();
+	this.images=[];
 	this.currentFrame=0;
 	this.framesPerImage=1;
 	var currentImage=0;
@@ -227,7 +229,7 @@ function Animation(_img,_frameWidth,_frameHeight,_framesPerImage){
 		this.currentFrame--;
 		if (this.currentFrame<0)
 			this.currentFrame=this.geTotalFrames()-1;
-		currentImage=parseInt(this.currentFrame/this.framesPerImage);
+		currentImage=~~(this.currentFrame/this.framesPerImage);
 		return this.currentFrame;
 	}
 
@@ -235,7 +237,7 @@ function Animation(_img,_frameWidth,_frameHeight,_framesPerImage){
 		this.currentFrame++;
 		if(this.currentFrame>this.geTotalFrames()-1)
 			this.currentFrame=0;
-		currentImage=parseInt(this.currentFrame/this.framesPerImage);
+		currentImage=~~(this.currentFrame/this.framesPerImage);
 		return this.currentFrame;
 	}
 
@@ -294,13 +296,13 @@ function Animation(_img,_frameWidth,_frameHeight,_framesPerImage){
 				ctx.save();
 				if(isNaN(row)){
 					ctx.translate(spr.getCenterX()+ox-Camera.x,spr.getCenterY()+oy-Camera.y);
-					ctx.rotate(spr.rotation*Math.PI/180);
+					ctx.rotate(spr.rotation*Math.DEG);
 					ctx.scale(spr.scale*h,spr.scale*v);
 					ctx.drawImage(tImg,frameWidth*currentImage,0,frameWidth,tImg.height,frameWidth*-0.5,tImg.height*-0.5,frameWidth,tImg.height);
 				}
 				else{
 					ctx.translate(spr.getCenterX()+ox-Camera.x,spr.getCenterY()+oy-Camera.y);
-					ctx.rotate(spr.rotation*Math.PI/180);
+					ctx.rotate(spr.rotation*Math.DEG);
 					ctx.scale(spr.scale*h,spr.scale*v);
 					ctx.drawImage(tImg,frameWidth*currentImage,frameHeight*row,frameWidth,frameHeight,frameWidth*-0.5,frameHeight*-0.5,frameWidth,frameHeight);
 				}
@@ -314,8 +316,6 @@ function Animation(_img,_frameWidth,_frameHeight,_framesPerImage){
 		}
 		else if(window.cosole)console.error('Data missing in Animation.drawSprite(ctx,spr[,offsetX,offsetY,row])');
 	}
-
-	return this;
 }
 //	Button.js
 function Button(_x,_y,_width,_height){
@@ -360,11 +360,9 @@ function Button(_x,_y,_width,_height){
 		}
 		else if(window.cosole)console.error('Data missing in Button.draw(ctx[,img,offsetX,offsetY])');
 	}
-	
-	return this;
 }
 //	Camera.js
-Camera=new function(){
+var Camera=new function(){
 	this.x=0;
 	this.y=0;
 	
@@ -416,11 +414,9 @@ Camera=new function(){
 		}
 		else if(window.cosole)console.error('Data missing in Camera.focus(spr[,slide,offsetX,offsetY])');
 	}
-	
-	return this;
 }
 //	debug
-debug=new function(){
+var debug=new function(){
 	this.frames=0;
 	var FPS=0;
 	var AFPS=0;
@@ -463,7 +459,7 @@ debug=new function(){
 	}
 }
 //	Mouse.js
-Mouse=new function(){
+var Mouse=new function(){
 	var x=0;
 	var y=0;
 
@@ -481,8 +477,6 @@ Mouse=new function(){
 		}
 		else if(window.cosole)console.error('Data missing in Mouse.draw(ctx)');
 	}
-	
-	return this;
 }
 //	Particle.js
 function Particle(_x,_y,_diameter,_life,_speed,_angle,_colorStart,_colorEnd){
@@ -497,7 +491,7 @@ function Particle(_x,_y,_diameter,_life,_speed,_angle,_colorStart,_colorEnd){
 	this.angle=0;
 	this.rotation=0;
 	this.color='#000';
-	this.colorList=new Array();
+	this.colorList=[];
 
 	this.Particle=function(_x,_y,_diameter,_life,_speed,_angle,_colorStart,_colorEnd){
 		if(_colorStart!=null){
@@ -532,7 +526,7 @@ function Particle(_x,_y,_diameter,_life,_speed,_angle,_colorStart,_colorEnd){
 	this.Particle(_x,_y,_diameter,_life,_speed,_angle,_colorStart,_colorEnd);
 
 	function hex2rgb(h){
-		var c=new Array();
+		var c=[];
 		h=(h.charAt(0)=='#')? h.substring(1,7):h;
 		if(h.length==3){
 			c[0]=parseInt(h.charAt(0),16)*17;
@@ -549,13 +543,11 @@ function Particle(_x,_y,_diameter,_life,_speed,_angle,_colorStart,_colorEnd){
 
 	function rgb2hex(r,g,b){return '#'+clr2hex(r)+clr2hex(g)+clr2hex(b);}
 	function clr2hex(n){
-		var n=parseInt(n,10);
+		n=parseInt(n,10);
 		if(isNaN(n)) return '00';
 		n=Math.max(0,Math.min(n,255));
 		return '0123456789ABCDEF'.charAt((n-n%16)/16)+'0123456789ABCDEF'.charAt(n%16);
 	}
-
-	return this;
 }
 //	ParticleSystem.js
 function ParticleSystem(){
@@ -563,53 +555,59 @@ function ParticleSystem(){
 	this.wind=0;
 
 	this.addParticle=function(p_x,y,diameter,life,speed,angle,colorStart,colorEnd){
-		if(isNaN(parseInt(p_x,10)))
+		if(typeof p_x == 'object')
 			this.push(p_x);
 		else
 			this.push(new Particle(p_x,y,diameter,life,speed,angle,colorStart,colorEnd));
 	}
 
 	this.moveParticles=function(){
-		for(var i=0;i<this.length;++i){
+		for(var i=0,l=this.length;i<l;++i){
 			if (this[i].life>0){
-				this[i].x+=this[i].speed*(Math.cos(this[i].angle*(Math.PI/180)))+this.wind*(this[i].olife-this[i].life);
-				this[i].y+=this[i].speed*(Math.sin(this[i].angle*(Math.PI/180)))+this.gravity*(this[i].olife-this[i].life);
+				this[i].x+=this[i].speed*(Math.cos(this[i].angle*Math.DEG))+this.wind*(this[i].olife-this[i].life);
+				this[i].y+=this[i].speed*(Math.sin(this[i].angle*Math.DEG))+this.gravity*(this[i].olife-this[i].life);
 				this[i].life--;
 				if(this[i].colorList.length>0)
 					this[i].color=this[i].colorList.shift();
 			}
-			else this.splice(i--,1);
+			else{
+				this.remove(i--);
+				l--;
+			}
 		}
 	}
 
 	this.moveParticlesO=function(){
-		for(var i=0;i<this.length;++i){
+		for(var i=0,l=this.length;i<l;++i){
 			if (this[i].life>0){
 				this[i].ox=this[i].x;
 				this[i].oy=this[i].y;
-				this[i].x+=this[i].speed*(Math.cos(this[i].angle*(Math.PI/180)))+this.wind*(this[i].olife-this[i].life);
-				this[i].y+=this[i].speed*(Math.sin(this[i].angle*(Math.PI/180)))+this.gravity*(this[i].olife-this[i].life);
+				this[i].x+=this[i].speed*(Math.cos(this[i].angle*Math.DEG))+this.wind*(this[i].olife-this[i].life);
+				this[i].y+=this[i].speed*(Math.sin(this[i].angle*Math.DEG))+this.gravity*(this[i].olife-this[i].life);
 				this[i].life--;
 				if(this[i].colorList.length>0)
 					this[i].color=this[i].colorList.shift();
 			}
-			else this.splice(i--,1);
+			else{
+				this.remove(i--);
+				l--;
+			}
 		}
 	}
 
 	this.drawParticles=function(ctx,alpha,img){
 		if(img!=null){
-			for(var i=0;i<this.length;++i){
+			for(var i=0,l=this.length;i<l;++i){
 				ctx.save();
 				if(alpha)ctx.globalAlpha=this[i].life/this[i].olife;
 				ctx.translate(this[i].x-Camera.x,this[i].y-Camera.y);
-				ctx.rotate(this[i].rotation*Math.PI/180);
+				ctx.rotate(this[i].rotation*Math.DEG);
 				ctx.drawImage(img,img.width*-0.5,img.height*-0.5);
 				ctx.restore();
 			}
 		}
 		else if(ctx!=null){
-			for(var i=0;i<this.length;++i){
+			for(var i=0,l=this.length;i<l;++i){
 				ctx.fillStyle=this[i].color;
 				ctx.save();
 				if(alpha)ctx.globalAlpha=this[i].life/this[i].olife;
@@ -625,7 +623,7 @@ function ParticleSystem(){
 
 	this.drawParticlesO=function(ctx,alpha){
 		if(ctx!=null){
-			for(var i=0;i<this.length;++i){
+			for(var i=0,l=this.length;i<l;++i){
 				ctx.strokeStyle=this[i].color;
 				ctx.fillStyle=this[i].color;
 				ctx.save();
@@ -644,10 +642,8 @@ function ParticleSystem(){
 		}
 		else if(window.cosole)console.error('Data missing in ParticleSystem.drawParticles0(ctx[,alpha])');
 	}
-	
-	return this;
-};
-ParticleSystem.prototype=new Array();
+}
+ParticleSystem.prototype=[];
 //	Sprite.js
 function Sprite(_x,_y,_width,_height,_type){
 	this.ox=(isNaN(_x))?0:_x;
@@ -719,8 +715,8 @@ function Sprite(_x,_y,_width,_height,_type){
 
 	this.setDirection=function(angle,speed){
 		if(speed!=null){
-			this.vx=speed*Math.cos((Math.PI/180)*angle);
-			this.vy=speed*Math.sin((Math.PI/180)*angle);
+			this.vx=speed*Math.cos(angle*Math.DEG);
+			this.vy=speed*Math.sin(angle*Math.DEG);
 		}
 		else if(window.cosole)console.error('Data missing in Sprite.setDirection(angle,speed)');
 	}
@@ -728,16 +724,16 @@ function Sprite(_x,_y,_width,_height,_type){
 	this.getAngle=function(spr){
 		var angle=0;
 		if(spr!=null)
-			angle=(Math.atan2(this.getCenterY()-spr.getCenterY(),this.getCenterX()-spr.getCenterX()))/(Math.PI/180)+90;
+			angle=(Math.atan2(this.getCenterY()-spr.getCenterY(),this.getCenterX()-spr.getCenterX()))/Math.DEG+90;
 		else
-			angle=(Math.atan2(this.vy,this.vx))/(Math.PI/180);
+			angle=(Math.atan2(this.vy,this.vx))/Math.DEG;
 		if(angle>360)angle-=360;
 		if(angle<0)angle+=360;
 		return angle;
 	}
 
 	this.getSpeed=function(){
-		return this.vx/Math.cos((Math.PI/180)*this.getAngle());
+		return this.vx/Math.cos(Math.DEG*this.getAngle());
 	}
 
 	this.getWidth=function(){
@@ -808,7 +804,7 @@ function Sprite(_x,_y,_width,_height,_type){
 	this.collisionMap=function(type,hx,hy){
 		var collision=0;
 		var closest=this.getDiameter()/2;
-		for (var i=0;i<World.map.length;i++){
+		for (var i=0,l=World.map.length;i<l;i++){
 			var spr=World.map.getSprite(i);
 			if(hy!=null)spr=new Sprite(spr.x+hx,spr.y+hy,0);
 			if(((type!=null)?type==spr.type:true)&&
@@ -830,7 +826,7 @@ function Sprite(_x,_y,_width,_height,_type){
 		if(exception!=null){
 			var collision=0;
 			var closest=this.getDiameter()/2;
-			for (var i=0;i<World.map.length;i++){
+			for (var i=0,l=World.map.length;i<l;i++){
 				var spr=World.map.getSprite(i);
 				if(((exception!=null)?exception!=i:true)&&
 					this.x<spr.x+spr.getWidth()&&
@@ -853,7 +849,7 @@ function Sprite(_x,_y,_width,_height,_type){
 		if(typeMax!=null){
 			var collision=0;
 			var closest=this.getDiameter()/2;
-			for (var i=0;i<World.map.length;i++){
+			for (var i=0,l=World.map.length;i<l;i++){
 				var spr=World.map.getSprite(i);
 				if(hy!=null)spr=new Sprite(spr.x+hx,spr.y+hy,0);
 				if(((exception!=null)?exception!=i:true)&&
@@ -879,7 +875,7 @@ function Sprite(_x,_y,_width,_height,_type){
 		if(newType!=null){
 			var collision=0;
 			var closest=this.getDiameter()/2;
-			for (var i=0;i<World.map.length;i++){
+			for (var i=0,l=World.map.length;i<l;i++){
 				var spr=World.map.getSprite(i);
 				if(hy!=null)spr=new Sprite(spr.x+hx,spr.y+hy,0);
 				if(((exception!=null)?exception!=i:true)&&
@@ -896,7 +892,8 @@ function Sprite(_x,_y,_width,_height,_type){
 						}
 						else{
 							collision=spr.type;
-							World.map.remove(i);
+							World.map.remove(i--);
+							l--;
 						}
 						closest=d;
 					}
@@ -916,7 +913,7 @@ function Sprite(_x,_y,_width,_height,_type){
 				var v=(this.vflip)?-1:1;
 				ctx.save();
 				ctx.translate(this.getCenterX()+ox-Camera.x,this.getCenterY()+oy-Camera.y);
-				ctx.rotate(this.rotation*Math.PI/180);
+				ctx.rotate(this.rotation*Math.DEG);
 				ctx.scale(this.scale*h,this.scale*v);
 				ctx.drawImage(img,img.width*-0.5,img.height*-0.5);
 				ctx.restore();
@@ -939,8 +936,6 @@ function Sprite(_x,_y,_width,_height,_type){
 		}
 		else if(window.cosole)console.error('Data missing in Sprite.drawSprite(ctx[,img,offsetX,offsetY])');
 	}
-
-	return this;
 }
 // SpriteSheet.js
 function SpriteSheet(_img,_spriteWidth,_spriteHeight){
@@ -966,7 +961,7 @@ function SpriteSheet(_img,_spriteWidth,_spriteHeight){
 				if(window.cosole)console.log('IPR: '+ipr)
 				if(col>ipr){
 					col=col%ipr;
-					row=parseInt(col/ipr);
+					row=~~(col/ipr);
 				}
 				else
 					row=0;
@@ -996,19 +991,19 @@ function SpriteSheet(_img,_spriteWidth,_spriteHeight){
 			oy=(isNaN(oy))?0:oy;
 			var h=(spr.hflip)?-1:1;
 			var v=(spr.vflip)?-1:1;
-			if(isNaN(row)&&img.width){
-				var ipr=col>Math.round(img.width/spriteWidth);
+			if(isNaN(row)&&this.img.width){
+				var ipr=col>Math.round(this.img.width/spriteWidth);
 				if(window.cosole)console.log('IPR: '+ipr)
 				if(col>ipr){
 					col=col%ipr;
-					row=parseInt(col/ipr);
+					row=~~(col/ipr);
 				}
 				else
 					row=0;
 			}
 			ctx.save();
 			ctx.translate(spr.getCenterX()+ox-Camera.x,spr.getCenterY()+oy-Camera.y);
-			ctx.rotate(spr.rotation*Math.PI/180);
+			ctx.rotate(spr.rotation*Math.DEG);
 			ctx.scale(spr.scale*h,spr.scale*v);
 			try{
 				ctx.drawImage(this.img,spriteWidth*col,spriteHeight*row,spriteWidth,spriteHeight,spriteWidth*-0.5,spriteHeight*-0.5,spriteWidth,spriteHeight);
@@ -1029,7 +1024,7 @@ function SpriteSheet(_img,_spriteWidth,_spriteHeight){
 			var v=(spr.vflip)?-1:1;
 			ctx.save();
 			ctx.translate(spr.getCenterX()+ox-Camera.x,spr.getCenterY()+oy-Camera.y);
-			ctx.rotate(spr.rotation*Math.PI/180);
+			ctx.rotate(spr.rotation*Math.DEG);
 			ctx.scale(spr.scale*h,spr.scale*v);
 			try{
 				ctx.drawImage(this.img,ax,ay,aw,ah,aw*-0.5,ah*-0.5,aw,ah);
@@ -1041,13 +1036,11 @@ function SpriteSheet(_img,_spriteWidth,_spriteHeight){
 		}
 		else if(window.cosole)console.error('Data missing in SpriteSheet.drawSprite(ctx,spr,areaX,areaY,areaWidth,areaHeight[,offsetX,offsetY])');
 	}
-	
-	return this;
 }
 //	SpriteVector.js
 function SpriteVector(){
 	this.addSprite=function(spr_x,y,width,height,type){
-		if(isNaN(parseInt(spr_x,10)))
+		if(typeof spr_x == 'object')
 			this.push(spr_x);
 		else
 			this.push(new Sprite(spr_x,y,width,height,type));
@@ -1056,16 +1049,16 @@ function SpriteVector(){
 	this.addMap=function(map,cols,width,height,masterSprites){
 		if(width!=null){
 			height=(isNaN(height))?width:height;
-			for(var a=0;a<map.length;a++)
+			for(var a=0,l=map.length;a<l;a++)
 				if(map[a]>0){
 					var spr;
 					if(masterSprites!=null){
 						spr=new Sprite(masterSprites.getSprite(map[a]));
-						spr.setOrigin((a%cols)*width,parseInt(a/cols)*height);
+						spr.setOrigin((a%cols)*width,~~(a/cols)*height);
 						spr.resetPosition();
 					}
 					else
-						spr=new Sprite((a%cols)*width,parseInt(a/cols)*height,width,height);
+						spr=new Sprite((a%cols)*width,~~(a/cols)*height,width,height);
 					spr.type=map[a];
 					this.addSprite(spr);
 				}
@@ -1078,14 +1071,14 @@ function SpriteVector(){
 	}
 
 	this.move=function(){
-		for(var i=0;i<this.length;++i)
+		for(var i=0,l=this.length;i<l;++i)
 			this[i].move();
 	}
 
 	this.collisionBox=function(spr){
 		var c=false;
 		if(spr!=null){
-			for(var i=0;i<this.length;i++)
+			for(var i=0,l=this.length;i<l;i++)
 				if(this[i].collisionBox(spr))
 					c=true;
 		}
@@ -1094,22 +1087,20 @@ function SpriteVector(){
 	}
 
 	this.drawSprites=function(ctx,img,ox,oy){
-		for(var i=0;i<this.length;++i){
+		for(var i=0,l=this.length;i<l;++i){
 			var tImg;
 			if(img!=null&&img instanceof Array)tImg=img[this[i].type];
 			else tImg=img;
 			this[i].drawSprite(ctx,tImg,ox,oy);
 		}
 	}
-
-	return this;
 }
-SpriteVector.prototype=new Array();
+SpriteVector.prototype=[];
 //	Util.js
-Util=new function(){
+var Util=new function(){
 	this.getAngle=function(x1,y1,x2,y2){
 		if(y2!=null){
-			var angle=(Math.atan2(y1-y2,x1-x2))/(Math.PI/180)+90;
+			var angle=(Math.atan2(y1-y2,x1-x2))/Math.DEG+90;
 			if(angle>360)angle-=360;
 			if(angle<0)angle+=360;
 			return angle;
@@ -1181,11 +1172,9 @@ Util=new function(){
 		}
 		else if(window.cosole)console.error('Data missing in Util.fillTile(ctx,img[,x,y,repeatX,repeatY])');
 	}
-
-	return this;
 }
 //	World.js
-World=new function(){
+var World=new function(){
 	this.width=0;
 	this.height=0;
 	this.map=new SpriteVector();
@@ -1215,7 +1204,7 @@ World=new function(){
 		if(ctx!=null){
 			ctx.strokeStyle='#f00';
 			ctx.fillStyle='#f00';
-			for(var i=0;i<this.map.length;i++){
+			for(var i=0,l=this.map.length;i<l;i++){
 				var spr=this.map[i];
 				if(img!=null){
 					var de=(deviation)?spr.type+spr.var1:spr.type;
@@ -1258,6 +1247,4 @@ World=new function(){
 		}
 		else if(window.cosole)console.error('Data missing in World.drawMap(ctx[,img,imagesPerRow])');
 	}
-
-	return this;
 }
