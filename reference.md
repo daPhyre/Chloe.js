@@ -59,7 +59,7 @@ The current pseudo-classes in COJSGE are these:
 
 Static pseudo-classes:
  * [Camera] (#camera)
- * [Mouse] (#mouse)
+ * [Input] (#Input)
  * [Util] (#util)
  * [World] (#world)
 
@@ -80,16 +80,6 @@ CanvasRenderingContext2D ctx
 The context of the current canvas. Direct use outside the paint loop is recomended only to display messages when non-asyncronous events may temporally freeze the game.
 
 ```idl
-long lastPress
-```
-The last pressed key on the keyboard, or the last pressed mouse button. To know if an specific key has been pressed, you should call for example `if(lastPress==KEY_SPACEBAR)` (see [cojsge_defs](#cojsge_defsjs)). You should assign `null` to `lastPress` after using it, as the loop will continue returning `true` in the past example if not.
-
-```idl
-long lastRelease
-```
-The last released key on the keyboard, or the last released mouse button. To know if an specific key has been released, you should call for example `if(lastRelease==KEY_SPACEBAR)` (see [cojsge_defs](#cojsge_defsjs)). You should assign `null` to `lastRelease` after using it, as the loop will continue returning `true` in the past example if not.
-
-```idl
 boolean isFullscreen
 ```
 Turns fullscreen mode on/off. Note: it fills the browser screen; it doesn't force the browser to enter into fullscreen (like when pressing F11).
@@ -98,11 +88,6 @@ Turns fullscreen mode on/off. Note: it fills the browser screen; it doesn't forc
 boolean screenDebug
 ```
 Turns screen debugging mode on/off. Turning on `screenDebug` shows tecnical info of your game in screen and all the collision bounds of all the elements in the game will be drawn over their respective images.
-
-```idl
-boolean pressing[]
-```
-Array that keep track of the current pressed keys and mouse buttons. To know if an specific key is being press, you should call for example `if(pressing[KEY_SPACEBAR])` (see [cojsge_defs](#cojsge_defsjs)).
 
 ### Public functions
 #### onReady
@@ -145,7 +130,7 @@ The `Game` pseudo-class creates a new game assigned to the canvas with id "canva
 
 | **[Contructor summary](#game-constructor)** |
 | --- |
-| [Game(optional DOMString canvasId, optional boolean autoFull, optional long fullMode)](#gamegame)	|
+| [Game(optional DOMString canvasId, optional long fullMode, optional boolean autoFull, optional boolean autoFullOnMobile)](#gamegame)	|
 
 | | **[Functions summary](#game-functions)** |
 | --- | --- |
@@ -157,15 +142,17 @@ The `Game` pseudo-class creates a new game assigned to the canvas with id "canva
 #### Game.Game
 ```idl
 Game(optional DOMString canvasId = "canvas",
+	 optional long fullMode = 0,
 	 optional boolean autoFull = true,
-	 optional long fullMode = 0)
+	 optional boolean autoFullOnMobile = true)
 ```
 Creates a new game asigned to our canvas with ID canvasID.
 
 **Parameters:**  
 *canvasId* - ID of the canvas to bound the game. If no ID is given, COJSGE will search for the DOMElement with ID "canvas".  
+*fullMode* - The way to fill the screen when in Fullscreen Mode. See [Fullscreen Mode](#fullscreen-mode) for more information.  
 *autoFull* - Sets if the game will fill automatically the screen when user enters into Fullscreen mode (Like, when pressing F11).  
-*fullMode* - The way to fill the screen when in Fullscreen Mode. 0 is FULLSCREEN_NORMAL (bars of BackgroundColor will be added if needed), 1 is FULLSCREEN_ZOOM (stage will crop to fill screen) and 2 is FULLSCREEN_STRETCH (image will stretch to fill the screen).
+*autoFullOnMobile* - Sets if the game will fill automatically the screen when the screen is smaller than the canvas bound, common default task on mobile devices.  
 
 ### Game functions
 #### Game.getScreenshot
@@ -355,6 +342,7 @@ This pseudo-class makes a simple button, interactive only with the mouse. Button
 | --- | --- |
 | boolean	| [mouseOver(void)](#buttonmouseover)	|
 | boolean	| [mouseDown(void)](#buttonmousedown)	|
+| boolean	| [touch(void)](#buttontouch)	|
 | void	| [draw(CanvasRenderingContext2D ctx, optional Image img, optional double offsetX, optional double offsetY)](#buttondraw)	|
 
 ### Button constructor
@@ -391,6 +379,15 @@ Checks if the mouse left button is being pressed while the cursor is over the bu
 
 **Returns:**  
 `true` if the mouse left button is being pressed while the cursor is over the button, `false` otherwise.
+
+#### Button.touch
+```idl
+boolean touch(void)
+```
+Checks if any screen touch is being holded over the button.
+
+**Returns:**  
+`true` if any screen touch is being holded over the button, `false` otherwise.
 
 #### Button.draw
 ```idl
@@ -673,8 +670,12 @@ This pseudo-class creates an element to be used in the game, interactive with ot
 | long	| [collisionMapRange(long typeMin, long typeMax, optional double hotspotX, optional double hotspotY, optional long exception)](#spritecollisionmaprange)	|
 | long	| [collisionMapSwitch(long type, long newType, optional double hotspotX, optional double hotspotY, optional long exception)](#spritecollisionmapswitch)	|
 | boolean	| [collisionPoint(double x, double y)](#spritecollisionpoint)	|
+| boolean	| [contains(Object obj)](#spritecontains)	|
+| boolean	| [contains(double x, double y, optional double width, optional double height)](#spritecontains)	|
+| double	| [distance(Sprite spr, optional boolean inner)](#spritedistance)	|
 | void	| [drawSprite(CanvasRenderingContext2D ctx, optional Image img, optional double offsetX, optional double offsetY)](#spritedrawsprite)	|
-| double	| [getDistance(Sprite spr, optional boolean inner)](#spritegetdistance)	|
+| boolean	| [intersects(Object obj)](#spriteintersects)	|
+| boolean	| [intersects(double x, double y, double width, double height)](#spriteintersects)	|
 | double	| [getAngle(void)](#spritegetangle)	|
 | double	| [getAngle(Sprite spr)](#spritegetangle)	|
 | Point	| [getCenter(void)](#spritegetcenter)	|
@@ -929,14 +930,57 @@ The position plus one of the closest World Map sprite colliding of the type rece
 boolean collisionPoint(double x,
 					   double y)
 ```
-Detects if the current sprite collides with the specified point.
+Detects if the current sprite contains within it's bounds the specified point. Is the same as calling `Sprite.contains(double x, double y)`.
 
 **Parameters:**  
 *x* - The x coordinate of the point to compare.  
 *y* - The y coordinate of the point to compare.
 
 **Returns:**  
-`true` if the current sprite collides with the comparing point, `false` otherwise.
+`true` if the current sprite contains within it's bounds the comparing point, `false` otherwise.
+
+#### Sprite.contains
+```idl
+boolean contains(Object obj)
+```
+Detects if the current sprite contains within it's bounds the specified object, being it a point or a rectangle. It doesn't takes on count if the rectangle is scaled.
+
+**Parameters:**  
+*obj* - The object to compare against.
+
+**Returns:**  
+`true` if the current sprite contains within it's bounds the comparing object, `false` otherwise.
+
+```idl
+boolean contains(double x,
+				 double y
+				 optional double width,
+				 optional double height)
+```
+Detects if the current sprite contains within it's bounds the specified point or area.
+
+**Parameters:**  
+*x* - The x coordinate of the point or area to compare.  
+*y* - The y coordinate of the point or area to compare.  
+*width* - The width of the area to compare.  
+*height* - The height of the area to compare.
+
+**Returns:**  
+`true` if the current sprite contains within it's bounds the comparing point or area, `false` otherwise.
+
+#### Sprite.distance
+```idl
+double distance(Sprite spr,
+				optional boolean inner = false)
+```
+Calculates the distance between the current sprite and the given sprite.
+
+**Parameters:**  
+*spr* - The sprite to get the distance from.  
+*inner* - If set true, and the sprites are rectangular instead of square, this function will compare the distance with the inner circle of the sprites instead of the outer one.
+
+**Returns:**  
+The distance in pixels between the two sprites.
 
 #### Sprite.drawSprite
 ```idl
@@ -953,19 +997,34 @@ Draws the sprite on the given `CanvasRenderingContext2D`. If no image is specifi
 *offsetX* - The offset in the x coordinate to move the image from the sprite.  
 *offsetY* - The offset in the y coordinate to move the image from the sprite.
 
-#### Sprite.getDistance
+#### Sprite.intersects
 ```idl
-double getDistance(Sprite spr,
-				   optional boolean inner = false)
+boolean intersects(Object obj)
 ```
-Calculates the distance between the current sprite and the given sprite.
+Detects if the current sprite intersects within it's bounds the specified object, being it a point or a rectangle. In contrast with `Sprite.collisionBox`, this function doesn't takes on count if the rectangle is scaled.
 
 **Parameters:**  
-*spr* - The sprite to get the distance from.  
-*inner* - If set true, and the sprites are rectangular instead of square, this function will compare the distance with the inner circle of the sprites instead of the outer one.
+*obj* - The object to compare against.
 
 **Returns:**  
-The distance in pixels between the two sprites.
+`true` if the current sprite intersects within it's bounds the comparing object, `false` otherwise.
+
+```idl
+boolean intersects(double x,
+				   double y
+				   double width,
+				   double height)
+```
+Detects if the current sprite intersects within it's bounds the specified area.
+
+**Parameters:**  
+*x* - The x coordinate of the area to compare.  
+*y* - The y coordinate of the area to compare.  
+*width* - The width of the area to compare.  
+*height* - The height of the area to compare.
+
+**Returns:**  
+`true` if the current sprite intersects within it's bounds the comparing point or area, `false` otherwise.
 
 #### Sprite.getAngle
 ```idl
@@ -1405,43 +1464,275 @@ The camera centers on the given sprite.
 *offsetX* - Horizontal distance from the world border to limit the camera movement. Negative values allow the camera to move beyond the world horizontal border.  
 *offsetY* - Vertical distance from the world border to limit the camera movement. Negative values allow the camera to move beyond the world vertical border. If no value is given, `offsetY` will take the value of `offsetX`.
 
-## Mouse
+## Input
 ```idl
-static Mouse()
+static Input()
 ```
-Mouse is an static pseudo-class which handles the coordinates of the mouse, respective to the game.
+Input is an static pseudo-class which handles all external inputs, including keyboard, mouse, multitouch screen and accelerometer.
 
-| | **[Variables summary](#mouse-variables)** |
+| | **[Variables summary](#input-variables)** |
 | --- | --- |
-| long	| [x](#mousex)	|
-| long	| [y](#mousey)	|
+| Object	| [acceleration](#inputacceleration)	|
+| long	| [lastPress](#inputlastpress)	|
+| long	| [lastRelease](#inputlastrelease)	|
+| long	| [lastTouchPress](#inputlasttouchpress)	|
+| long	| [lastTouchRelease](#inputlasttouchrelease)	|
+| Object	| [mouse](#inputmouse)	|
+| Object	| [orientation](#inputorientation)	|
+| boolean	| [pressing](#inputpressing)	|
+| Object	| [touches](#inputtouches)	|
 
-| | **[Functions summary](#mouse-functions)** |
+| | **[Functions summary](#input-functions)** |
 | --- | --- |
-| void	| [draw(CanvasRenderingContext2D ctx)](#mousedraw)	|
+| void	| [enableAcceleration()](#inputenableacceleration)	|
+| void	| [enableKeyboard()](#inputenablekeyboard)	|
+| void	| [enableMouse()](#inputenablemouse)	|
+| void	| [enableOrientation()](#inputenableorientation)	|
+| void	| [enableTouch()](#inputenabletouch)	|
+| void	| [disableAcceleration()](#inputdisableacceleration)	|
+| void	| [disableKeyboard()](#inputdisablekeyboard)	|
+| void	| [disableMouse()](#inputdisablemouse)	|
+| void	| [disableOrientation()](#inputdisableorientation)	|
+| void	| [disableTouch()](#inputdisabletouch)	|
 
-### Mouse variables
-#### Mouse.x
+### Input variables
+#### Input.acceleration
+```idl
+static acceleration()
+```
+Acceleration is an static object which handles the gravity acceleration on supported devices.
+
+| | **[Variables summary](#inputacceleration-variables)** |
+| --- | --- |
+| double	| [x](#inputaccelerationx)	|
+| double	| [y](#inputaccelerationy)	|
+| double	| [z](#inputaccelerationy)	|
+
+##### Input.acceleration variables
+###### Input.acceleration.x
+```idl
+double x
+```
+The x coordinate acceleration of the device.
+
+###### Input.acceleration.y
+```idl
+double y
+```
+The y coordinate acceleration of the device.
+
+###### Input.acceleration.z
+```idl
+double z
+```
+The z coordinate acceleration of the device.
+
+#### Input.lastPress
+```idl
+long lastPress
+```
+The last pressed key on the keyboard, or the last pressed mouse button. To know if an specific key has been pressed, you should call for example `if(lastPress==KEY_SPACEBAR)` (see [cojsge_defs](#cojsge_defsjs)). You should assign `null` to `lastPress` after using it, as the loop will continue returning `true` in the past example if not.
+
+#### Input.lastRelease
+```idl
+long lastRelease
+```
+The last released key on the keyboard, or the last released mouse button. To know if an specific key has been released, you should call for example `if(lastRelease==KEY_SPACEBAR)` (see [cojsge_defs](#cojsge_defsjs)). You should assign `null` to `lastRelease` after using it, as the loop will continue returning `true` in the past example if not.
+
+#### Input.lastTouchPress
+```idl
+long lastTouchPress
+```
+The unique identifier of the last touch pressed. You should assign `null` to `lastTouchPress` after using it, as the loop will continue returning the current value if not.
+
+#### Input.lastTouchRelease
+```idl
+long lastTouchRelease
+```
+The unique identifier of the last touch released. You should assign `null` to `lastTouchRelease` after using it, as the loop will continue returning the current value if not.
+
+#### Input.mouse
+```idl
+static mouse()
+```
+Mouse is an static object which handles the coordinates of the mouse, respective to the game.
+
+| | **[Variables summary](#inputmouse-variables)** |
+| --- | --- |
+| long	| [x](#inputmousex)	|
+| long	| [y](#inputmousey)	|
+
+| | **[Functions summary](#inputmouse-functions)** |
+| --- | --- |
+| void	| [draw(CanvasRenderingContext2D ctx)](#inputmousedraw)	|
+
+##### Input.mouse variables
+###### Input.mouse.x
 ```idl
 long x
 ```
 The x coordinate of the mouse, respective to the game.
 
-#### Mouse.y
+###### Input.mouse.y
 ```idl
 long y
 ```
 The y coordinate of the mouse, respective to the game.
 
-### Mouse functions
-#### Mouse.draw
+##### Input.mouse functions
+###### Input.mouse.draw
 ```idl
 void draw(CanvasRenderingContext2D ctx)
 ```
-Draws in the given `CanvasRenderingContext2D` a small red sight where the mouse is, respective to the game (Useful for debugging purposes. Should be the same to the mouse cursor all the time).
+Draws in the given `CanvasRenderingContext2D` a small red sight where the mouse is, respective to the game (Useful for debugging purposes. Should be the same to the mouse cursor all the time). The sight will be white if the mouse left button is being hold.
 
 **Parameters:**  
 *ctx* - The `CanvasRenderingContext2D` where the mouse position will be drawn.
+
+#### Input.orientation
+```idl
+static orientation()
+```
+Orientation is an static object which handles the orientation angle in degrees on supported devices.
+
+| | **[Variables summary](#inputorientation-variables)** |
+| --- | --- |
+| double	| [alpha](#inputorientationalpha)	|
+| double	| [beta](#inputorientationbeta)	|
+| double	| [gamma](#inputorientationgamma)	|
+
+##### Input.orientation variables
+###### Input.orientation.alpha
+```idl
+double alpha
+```
+The alpha orientation of the device.
+
+###### Input.orientation.beta
+```idl
+double beta
+```
+The beta orientation of the device.
+
+###### Input.orientation.gamma
+```idl
+double gamma
+```
+The gamma orientation of the device.
+
+
+#### Input.pressing
+```idl
+boolean pressing[]
+```
+Array that keep track of the current pressed keys and mouse buttons. To know if an specific key is being press, you should call for example `if(pressing[KEY_SPACEBAR])` (see [cojsge_defs](#cojsge_defsjs)).
+
+#### Input.touches
+```idl
+static touches()[]
+```
+Array that keep track of all the current screen touches on supported devices. Each touch has the next properties:
+
+| | **[Variables summary](#inputtouches-variables)** |
+| --- | --- |
+| long	| [id](#inputtouchesid)	|
+| long	| [x](#inputtouchesx)	|
+| long	| [y](#inputtouchesy)	|
+
+| | **[Functions summary](#inputtouches-functions)** |
+| --- | --- |
+| void	| [draw(CanvasRenderingContext2D ctx)](#inputtouchesdraw)	|
+
+##### Input.touches[i] variables
+###### Input.touches[i].id
+```idl
+long id
+```
+Unique identifier of the touch.
+
+###### Input.touches[i].x
+```idl
+long x
+```
+The x coordinate of the touch, respective to the game.
+
+###### Input.touches[i].y
+```idl
+long y
+```
+The y coordinate of the touch, respective to the game.
+
+##### Input.touches[i] functions
+###### Input.touches[i].draw
+```idl
+void draw(CanvasRenderingContext2D ctx)
+```
+Draws in the given `CanvasRenderingContext2D` a small gray circle where the touch is, respective to the game (Useful for debugging purposes. Should be the same to the current touch all the time).
+
+**Parameters:**  
+*ctx* - The `CanvasRenderingContext2D` where the touch position will be drawn.
+
+
+### Input functions
+#### Input.enableAcceleration
+```idl
+void enableAcceleration(void)
+```
+Enables motion listener on supported devices. Modifies the `acceleration` object values with the respective gravity acceleration of the device.
+
+#### Input.enableKeyboard
+```idl
+void enableKeyboard(void)
+```
+Enables keyboard listener. Modifies the `lastPress`, `lastRelease` and `pressing` variables with values from 8 to 222, depending on the action of the keys on the keyboard.
+
+#### Input.enableMouse
+```idl
+void enableMouse(void)
+```
+Enables mouse listener. Modifies the `mouse` object values with the respective mouse position on the game screen, and the `lastPress`, `lastRelease` and `pressing` variables with values from 1 to 3, depending on the action of the buttons on the mouse. Also, emulates one touch on the screen.
+
+#### Input.enableOrientation
+```idl
+void enableOrientation(void)
+```
+Enables orientation listener on supported devices. Modifies the `orientation` object values with the respective orientation of the device.
+
+#### Input.enableTouch
+```idl
+void enableTouch(void)
+```
+Enables screen touch listener on supported devices. Modifies the `touches` objects values with the respective touch position on the game screen. Also emulates the mouse movement and left click.
+
+#### Input.disableAcceleration
+```idl
+void disableAcceleration(void)
+```
+Disables motion listener.
+
+#### Input.disableKeyboard
+```idl
+void disableKeyboard(void)
+```
+Disables keyboard listener.
+
+#### Input.disableMouse
+```idl
+void disableMouse(void)
+```
+Disables mouse listener.
+
+#### Input.disableOrientation
+```idl
+void disableOrientation(void)
+```
+Disables orientation listener.
+
+#### Input.disableTouch
+```idl
+void disableTouch(void)
+```
+Disables touch listener.
 
 ## Util
 ```idl
@@ -1643,6 +1934,20 @@ Manually sets the size of the current world.
 To make easier some tasks with COJSGE, there is a second optional file included, called `cojsge_defs`. It includes definitions to the values of the keyboard keys, the mouse buttons and the fullscreen modes to set in the COGJSGE Game Class on it's creation. As you can access the numeric values directly, these definitions can make the coding of your game an easier task.
 
 Feel free to explore the file, so you can know the options you have when making a game, or as a cheat code to the common numeric values of the mouse and keyboard buttons.
+
+### Fullscreen Mode
+The second parameter when creating a new game is the Fullscreen Mode; there are 7 types of Fullscreen Mode for scale in COJSGE. The first 3 are static scale, that means, the proportion of the game will be kept the same. The remaining 4 are dynamic, which changes the proportion of the game to better fit the screen, but use these carefully and test thoroughly, as it may cause unexpected behaviour.
+
+**Static scale**  
+0 is FULLSCREEN_NORMAL - Bars of `BackgroundColor` will be added if needed.  
+1 is FULLSCREEN_ZOOM - Stage will crop to fill screen.  
+2 is FULLSCREEN_STRETCH - Image will stretch to fill the screen.
+
+**Dynamic scale**   
+3 is FULLSCREEN_RESIZE_LANDSCAPE - Proportion will adapt to the width if it is bigger than the height, and then scale.  
+4 is FULLSCREEN_RESIZE_PORTRAIT - Proportion will adapt to the height if it is bigger than the width, and then scale.  
+5 is FULLSCREEN_RESIZE_WIDTH - Proportion will adapt to the width always, and then scale.  
+6 is FULLSCREEN_RESIZE_HEIGHT - Proportion will adapt to the height always, and then scale.
 
 ## License
 

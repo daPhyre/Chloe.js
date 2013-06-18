@@ -2,7 +2,9 @@
 
 Based on http://code.google.com/p/kojage/
 
-COSJGE is intended to be a practical easy-to-use code for developing HTML5 games with the use of Canvas and JavaScript.
+COJSGE is intended to be a practical easy-to-use code for developing HTML5 games with the use of Canvas and JavaScript.
+
+Since COJSGE 0.9, the engine focuses on full support for both desktop and mobile HTML5 games.
 
 This is still an experimental JavaScript code, which can and may change radically. Future versions are not promised to be compatible with the current one.
 
@@ -17,7 +19,7 @@ The code included is:
  * example1.js 		- An example (source)
  * media 			- A folder containing all the media needed for the example
 
-In example.js, you can switch the comments in line 87 for line 88 and in line 137 for 138 to explore fun effects. Uncomment lines 131, 132 and 134 to learn how to use alpha transparency on sprites.
+In example1.js, you can switch the comments in line 140 for line 141 and in line 190 for 191 to explore fun effects.
 
 Questions, Suggestions, Gratifications*?
 Contact the developer at webmaster@jugaa.me

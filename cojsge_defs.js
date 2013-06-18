@@ -2,12 +2,16 @@
 * Canvas Open JavaScript Game Engine Definitions
 * @author daPhyre
 * @since 0.8, Sa/18/Jan/13
-* @version 0.8.1, Sa/02/Feb/13
+* @version 0.9, Su/16/Jun/13
 */
 
 const FULLSCREEN_NORMAL = 0;
 const FULLSCREEN_ZOOM = 1;
 const FULLSCREEN_STRETCH = 2;
+const FULLSCREEN_RESIZE_LANDSCAPE = 3;
+const FULLSCREEN_RESIZE_PORTRAIT = 4;
+const FULLSCREEN_RESIZE_WIDTH = 5;
+const FULLSCREEN_RESIZE_HEIGHT = 6;
 
 const MOUSE_BUTTON_LEFT = 1;
 const MOUSE_BUTTON_CENTER = 2;
