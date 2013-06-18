@@ -59,7 +59,7 @@ The current pseudo-classes in COJSGE are these:
 
 Static pseudo-classes:
  * [Camera] (#camera)
- * [Input] (#Input)
+ * [Input] (#input)
  * [Util] (#util)
  * [World] (#world)
 
