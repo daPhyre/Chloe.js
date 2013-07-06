@@ -5,9 +5,9 @@
  * @license CC-by-sa: http://creativecommons.org/licenses/by-sa/3.0/
  */
 "use strict";
-var myGame=new Game('canvas',FULLSCREEN_NORMAL,true,true);
+var cv=new Canvas('canvas',FULLSCREEN_NORMAL,true,true);
 
-function onReady(){
+cv.onReady=function(){
 	var SquareUnit=40;
 	var pause;
 	var player=new Sprite(380,300,SquareUnit);
@@ -37,7 +37,9 @@ function onReady(){
 		1,1,0,0,0,0,0,3,3,0,0,3,3,0,0,0,0,0,1,1
 	];
 
-	myGame.setBackground('#000',Util.getImage('media/grass.png'),false);
+	cv.setBackground('#000',Util.getImage('media/grass.png'),false);
+	//cv.setInterval(1000/20);
+	//cv.setAsync(false);
 	
 	World.setMap(map1,20,SquareUnit);
 	for(var i=0;i<3;i++)
@@ -61,7 +63,7 @@ function onReady(){
 	Input.enableAcceleration();
 	Input.enableOrientation();
 
-	game=function(){
+	cv.act=function(){
 		if(!pause){
 			// Paint lastPress and lastRelease
 			if(Input.lastPress!=null)
@@ -73,19 +75,19 @@ function onReady(){
 			player.vx=0;
 			
 			// Setplayer movement (keyboard)
-			if(Input.pressing[KEY_UP]){
+			if(Input.pressing[KEY_UP] || Input.pressing[KEY_W]){
 				player.vflip=true;
 				player.vy=-SquareUnit/8;
 			}
-			if(Input.pressing[KEY_DOWN]){
+			if(Input.pressing[KEY_DOWN] || Input.pressing[KEY_S]){
 				player.vflip=false;
 				player.vy=SquareUnit/8;
 			}
-			if(Input.pressing[KEY_LEFT]){
+			if(Input.pressing[KEY_LEFT] || Input.pressing[KEY_A]){
 				player.hflip=true;
 				player.vx=-SquareUnit/8;
 			}
-			if(Input.pressing[KEY_RIGHT]){
+			if(Input.pressing[KEY_RIGHT] || Input.pressing[KEY_D]){
 				player.hflip=false;
 				player.vx=SquareUnit/8;
 			}
@@ -175,14 +177,15 @@ function onReady(){
 		// ScreenShot
 		if(Input.lastPress==KEY_P){
 			if(Input.pressing[KEY_ALT])
-				myGame.getScreenshot();
+				cv.getScreenshot();
 		}
 		// Reset lastPress and lastRelease
 		Input.lastPress=null;
 		Input.lastRelease=null;
 	};
 
-	paint=function(ctx){
+	cv.paint=function(ctx){
+		// Draw Game
 		World.drawMap(ctx,sMap);
 		player.drawSprite(ctx,iPlayer);
 		for(var i=0;i<3;i++)
@@ -190,6 +193,7 @@ function onReady(){
 		ps.drawParticles(ctx,true);
 		//ps.drawParticles(ctx,true,iPlayer);
 		
+		// Draw Buttons
 		for(var i=0,l=buttons.length;i<l;i++){
 			if(buttons[i].mouseOver())
 				ctx.globalAlpha=0.7;
@@ -199,13 +203,15 @@ function onReady(){
 		}
 		ctx.globalAlpha=1;
 		
+		// Draw Touches & Mouse
 		ctx.fillStyle='#fff';
-		Input.mouse.draw(ctx);
 		for(var i=0,l=Input.touches.length;i<l;i++){
 			Input.touches[i].draw(ctx);
 			ctx.fillText('T'+i+': '+(Input.touches[i].x+Camera.x)+','+(Input.touches[i].y+Camera.y),stage.width-60,40+i*10);
 		}
+		Input.mouse.draw(ctx);
 		
+		// Draw Screen Text
 		ctx.fillStyle='#fff';
 		if(colliding)
 			ctx.fillText ('COLLISION!!',270,220);
@@ -235,4 +241,4 @@ function onReady(){
 			ctx.textAlign='left';
 		}
 	};
-}
+};

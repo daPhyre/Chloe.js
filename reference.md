@@ -4,25 +4,25 @@
 
 COJSGE stands for Canvas Open JavaScript Game Engine. It is pronounced as COJ'SGE (Very similar to "coshge", with a soft g as in "get").
 
-COJSGE is intended to be a practical easy-to-use engine for developing games with HTML5 Canvas + JavaScript. Current version is 0.8.
+COJSGE is intended to be a practical easy-to-use engine for developing games for desktop and mobile with HTML5 Canvas + JavaScript, but can also be used for any project using this technology. Current version is 0.9.
 
 ## Use
 
-To start using COJSGE for your game, you must declare a new game, and put your game code inside the onReady function. Next there is an example for the most basic configuration of a game with COJSGE:
+To start using COJSGE, you must start a new canvas, and put your code inside the `onReady` function. Next, there is an example with the most basic configuration of a code with COJSGE:
 
 ```javascript
-var myGame=new Game();
+var myCanvas=new Canvas();
 
-function onReady(){
+myCanvas.onReady=function(){
 	// Start your variables here
 	
-	game=function(){
-		// This is your game loop
+	myCanvas.act=function(){
+		// This is your actions loop. Move your objects here.
 		
 	}
 	
-	paint=function(ctx){
-		// This is your game renderer.
+	myCanvas.paint=function(ctx){
+		// This is your render loop. Draw your objects here.
 		
 	}
 }
@@ -32,7 +32,7 @@ For a more advanced example, please refer to the file [example1.js](http://githu
 
 ## Using cojsge.jsz
 
-Using cojsge.jsz will be slightly faster to download and use less bandwith in your server. To use it, create a `.htaccess` fil and add the next lines on it:
+Using cojsge.jsz will be slightly faster to download and use less bandwith in your server. To use it, create a `.htaccess` file and add the next lines on it:
 
 ```
 AddEncoding x-gzip .jsz
@@ -48,7 +48,7 @@ COJSGE is formed by many Pseudo-classes that allow developers to make frequent a
 As JavaScript doesn't needs to declare type of variables, nor if the pseudo-classes are static or not, I will partialy use [WebIDL](http://www.w3.org/TR/WebIDL) in this documentation, to allow developers an easy understanding of the pseudo-classes and functions within it.
 
 The current pseudo-classes in COJSGE are these:
- * [Game](#game)
+ * [Canvas](#canvas)
  * [Animation] (#animation)
  * [Button] (#button)
  * [Particle] (#particle)
@@ -72,12 +72,12 @@ Before starting with the pseudo-classes, I'll introduce the "Public" variable an
 ```idl
 HTMLCanvasElement stage
 ```
-The current canvas set to the game. Named "stage" instead of the generic "canvas" to prevent confunsion.
+The current canvas object set to the `Canvas`. Named "stage" instead of the generic "canvas" to prevent confunsion.
 
 ```idl
 CanvasRenderingContext2D ctx
 ```
-The context of the current canvas. Direct use outside the paint loop is recomended only to display messages when non-asyncronous events may temporally freeze the game.
+The context of the current canvas. Direct use outside the paint loop is recomended only to display messages when non-asyncronous events may temporally freeze the `Canvas.paint` function.
 
 ```idl
 boolean isFullscreen
@@ -87,29 +87,9 @@ Turns fullscreen mode on/off. Note: it fills the browser screen; it doesn't forc
 ```idl
 boolean screenDebug
 ```
-Turns screen debugging mode on/off. Turning on `screenDebug` shows tecnical info of your game in screen and all the collision bounds of all the elements in the game will be drawn over their respective images.
+Turns screen debugging mode on/off. Turning on `screenDebug` shows tecnical info of your canvas in screen and all the collision bounds of all the elements in the canvas will be drawn over their respective images.
 
 ### Public functions
-#### onReady
-```idl
-void onReady(void)
-```
-Is called when the webpage is loaded and the game is ready to start.
-
-#### game (function)
-```idl
-void game(void)
-```
-The main loop for your game logic. Is executed every "game.interval" times (Default is 60 times per second).
-
-#### paint
-```idl
-void paint(CanvasRenderingContext2D ctx)
-```
-Is called every possible time that requestAnimationFrame allow (Around 60 times per second). Is asyncroned from the game loop.
-**Parameters:**  
-*ctx* - The context to be used for painting.
-
 #### random
 ```idl
 double random(double max)
@@ -125,44 +105,78 @@ A random floating number from 0.0 to `max`.
 #### Array
 COJSGE extends the `Array` elements, giving them the properties `insert(long position, object element)`, `remove(long position)` and `removeAll()`.
 
-## Game
-The `Game` pseudo-class creates a new game assigned to the canvas with id "canvas", if no other ID is specified. This class is needed to start the game.
+## Canvas
+The `Canvas` pseudo-class starts the canvas with id "canvas", if no other ID is specified. This class is needed to start the engine.
 
-| **[Contructor summary](#game-constructor)** |
+| **[Contructor summary](#canvas-constructor)** |
 | --- |
-| [Game(optional DOMString canvasId, optional long fullMode, optional boolean autoFull, optional boolean autoFullOnMobile)](#gamegame)	|
+| [Canvas(optional DOMString canvasId, optional long fullMode, optional boolean autoFull, optional boolean autoFullOnMobile)](#canvascanvas)	|
 
-| | **[Functions summary](#game-functions)** |
+| | **[Functions summary](#canvas-functions)** |
 | --- | --- |
-| void	| [getScreenshot(void)](#gamegetscreenshot)	|
-| void	| [setBackground(DOMString color, optional DOMString image, optional boolean fixed)](#gamesetbackground)	|
-| void	| [setInterval(double interval)](#gamesetinterval)	|
+| void	| [act(void)](#canvasact)	|
+| void	| [getScreenshot(void)](#canvasgetscreenshot)	|
+| void	| [onReady(void)](#canvasonready)	|
+| void	| [paint(CanvasRenderingContext2D ctx)](#canvaspaint)	|
+| void	| [setAsync(boolean async)](#canvassetasync)	|
+| void	| [setBackground(DOMString color, optional DOMString image, optional boolean fixed)](#canvassetbackground)	|
+| void	| [setInterval(double interval)](#canvassetinterval)	|
 
-### Game constructor
-#### Game.Game
+### Canvas constructor
+#### Canvas.Canvas
 ```idl
-Game(optional DOMString canvasId = "canvas",
-	 optional long fullMode = 0,
-	 optional boolean autoFull = true,
-	 optional boolean autoFullOnMobile = true)
+Canvas(optional DOMString canvasId = "canvas",
+	   optional long fullMode = 0,
+	   optional boolean autoFull = true,
+	   optional boolean autoFullOnMobile = true)
 ```
-Creates a new game asigned to our canvas with ID canvasID.
+Creates a new canvas with ID canvasID.
 
 **Parameters:**  
-*canvasId* - ID of the canvas to bound the game. If no ID is given, COJSGE will search for the DOMElement with ID "canvas".  
+*canvasId* - ID of the canvas to be bound. If no ID is given, COJSGE will search for the DOMElement with ID "canvas".  
 *fullMode* - The way to fill the screen when in Fullscreen Mode. See [Fullscreen Mode](#fullscreen-mode) for more information.  
-*autoFull* - Sets if the game will fill automatically the screen when user enters into Fullscreen mode (Like, when pressing F11).  
-*autoFullOnMobile* - Sets if the game will fill automatically the screen when the screen is smaller than the canvas bound, common default task on mobile devices.  
+*autoFull* - Sets if the canvas will fill automatically the screen when user enters into Fullscreen mode (Like, when pressing F11).  
+*autoFullOnMobile* - Sets if the canvas will fill automatically the screen when the screen is smaller than the canvas bound, common default task on mobile devices.  
 
-### Game functions
-#### Game.getScreenshot
+### Canvas functions
+#### Canvas.act
+```idl
+void act(void)
+```
+The actions that happens frame after frame in the main loop. If `Canvas.async` is true, this is executed asynchronized from `Canvas.paint`, every `Canvas.interval` times (Default is 60 times per second). Else, it is called synchronized with `Canvas.paint`, every possible time that requestAnimationFrame allow.
+
+#### Canvas.getScreenshot
 
 ```idl
 void getScreenshot(void)
 ```
-Opens a new window with a PNG image screenshot of the game. Seems to work only on server-side webpages.
+Opens a new window with a PNG image screenshot of the canvas and the current frame. Seems to work only on server-side webpages.
 
-#### Game.setBackground
+#### Canvas.onReady
+```idl
+void onReady(void)
+```
+Is called when the webpage is loaded and the canvas is ready to start.
+
+#### Canvas.paint
+```idl
+void paint(CanvasRenderingContext2D ctx)
+```
+Is called every possible time that requestAnimationFrame allow (Around 60 times per second, depends on device).
+**Parameters:**  
+*ctx* - The context to be used for painting.
+
+#### Canvas.setAsync
+
+```idl
+void setAsync(boolean async)
+```
+Sets if `Canvas.act` synchronized with `Canvas.paint`, or regulated asynchronous by `Canvas.interval`.
+
+**Parameters:**  
+*async* - Whether the actions will be synchronized or not with the painting.
+
+#### Canvas.setBackground
 ```idl
 void setBackground(DOMString color,
 				   optional DOMString image = null,
@@ -171,22 +185,22 @@ void setBackground(DOMString color,
 Sets the background properties.
 
 **Parameters:**  
-*color* - The color for the background.  
-*image* - Image to be tiled in the background.  
-*fixed* - Sets if the background images will be fixed when the camera moves.
+*color* - The color for the canvas background.  
+*image* - Image to be tiled in the canvas background.  
+*fixed* - Sets if the canvas background images will be fixed when the camera moves.
 
-#### Game.setInterval
+#### Canvas.setInterval
 
 ```idl
 void setInterval(double interval)
 ```
-Sets the time between calls to the `game` function.
+If `Canvas.async` is true (default), sets the time between calls to the `act` function.
 
 **Parameters:**  
-*interval* - The time in miliseconds between calls. Default is 16.6 (Around 60 frames per second).
+*interval* - The time in miliseconds between calls. Default is 1000/60 (60 frames per second).
 
 ## Animation
-As it is recomended to use personal SpriteSheets for more optimized games, this pseudo-class offers an easy and simple way to make animations in your game.
+While it is recomended to use personal SpriteSheets for more optimized games, this pseudo-class offers in contrast an easy and simple way to make animations in your game.
 
 | | **[Variables summary](#animation-variables)** |
 | --- | --- |
@@ -1424,7 +1438,7 @@ Moves all the sprites inside the sprite vector.
 ```idl
 static Camera()
 ```
-Camera is an static pseudo-class which holds the coordinates from where the game will start to be drawn.
+Camera is an static pseudo-class which holds the coordinates from where the screen elements will start to be drawn.
 
 | | **[Variables summary](#camera-variables)** |
 | --- | --- |
@@ -1440,13 +1454,13 @@ Camera is an static pseudo-class which holds the coordinates from where the game
 ```idl
 long x
 ```
-The x coordinate from which the game will start to draw.
+The x coordinate from which the screen elements will start to draw.
 
 #### Camera.y
 ```idl
 long y
 ```
-The y coordinate from which the game will start to draw.
+The y coordinate from which the screen elements will start to draw.
 
 ### Camera functions
 #### Camera.focus
@@ -1555,12 +1569,14 @@ The unique identifier of the last touch released. You should assign `null` to `l
 ```idl
 static mouse()
 ```
-Mouse is an static object which handles the coordinates of the mouse, respective to the game.
+Mouse is an static object which handles the coordinates of the mouse, respective to the canvas.
 
 | | **[Variables summary](#inputmouse-variables)** |
 | --- | --- |
 | long	| [x](#inputmousex)	|
 | long	| [y](#inputmousey)	|
+| long	| [ox](#inputmouseox)	|
+| long	| [oy](#inputmouseoy)	|
 
 | | **[Functions summary](#inputmouse-functions)** |
 | --- | --- |
@@ -1571,20 +1587,32 @@ Mouse is an static object which handles the coordinates of the mouse, respective
 ```idl
 long x
 ```
-The x coordinate of the mouse, respective to the game.
+The x coordinate of the mouse, respective to the canvas.
 
 ###### Input.mouse.y
 ```idl
 long y
 ```
-The y coordinate of the mouse, respective to the game.
+The y coordinate of the mouse, respective to the canvas.
+
+###### Input.mouse.ox
+```idl
+long ox
+```
+The origin x coordinate of the mouse since the mouse button started to be pressed.
+
+###### Input.mouse.oy
+```idl
+long oy
+```
+The origin y coordinate of the mouse since the mouse button started to be pressed.
 
 ##### Input.mouse functions
 ###### Input.mouse.draw
 ```idl
 void draw(CanvasRenderingContext2D ctx)
 ```
-Draws in the given `CanvasRenderingContext2D` a small red sight where the mouse is, respective to the game (Useful for debugging purposes. Should be the same to the mouse cursor all the time). The sight will be white if the mouse left button is being hold.
+Draws in the given `CanvasRenderingContext2D` a small red sight where the mouse is, respective to the canvas (Useful for debugging purposes. Should be the same to the mouse cursor all the time). The sight will be white if the mouse left button is being hold, and a line indicating the drag since the mouse started to press.
 
 **Parameters:**  
 *ctx* - The `CanvasRenderingContext2D` where the mouse position will be drawn.
@@ -1638,6 +1666,8 @@ Array that keep track of all the current screen touches on supported devices. Ea
 | long	| [id](#inputtouchesid)	|
 | long	| [x](#inputtouchesx)	|
 | long	| [y](#inputtouchesy)	|
+| long	| [ox](#inputtouchesox)	|
+| long	| [oy](#inputtouchesoy)	|
 
 | | **[Functions summary](#inputtouches-functions)** |
 | --- | --- |
@@ -1654,20 +1684,32 @@ Unique identifier of the touch.
 ```idl
 long x
 ```
-The x coordinate of the touch, respective to the game.
+The x coordinate of the touch, respective to the canvas.
 
 ###### Input.touches[i].y
 ```idl
 long y
 ```
-The y coordinate of the touch, respective to the game.
+The y coordinate of the touch, respective to the canvas.
+
+###### Input.touches[i].ox
+```idl
+long ox
+```
+The origin x coordinate of the touch since it started.
+
+###### Input.touches[i].oy
+```idl
+long oy
+```
+The origin y coordinate of the touch since it started.
 
 ##### Input.touches[i] functions
 ###### Input.touches[i].draw
 ```idl
 void draw(CanvasRenderingContext2D ctx)
 ```
-Draws in the given `CanvasRenderingContext2D` a small gray circle where the touch is, respective to the game (Useful for debugging purposes. Should be the same to the current touch all the time).
+Draws in the given `CanvasRenderingContext2D` a small gray circle where the touch is, respective to the canvas (Useful for debugging purposes. Should be the same to the current touch all the time), and a line joining with the touch origin.
 
 **Parameters:**  
 *ctx* - The `CanvasRenderingContext2D` where the touch position will be drawn.
@@ -1690,7 +1732,7 @@ Enables keyboard listener. Modifies the `lastPress`, `lastRelease` and `pressing
 ```idl
 void enableMouse(void)
 ```
-Enables mouse listener. Modifies the `mouse` object values with the respective mouse position on the game screen, and the `lastPress`, `lastRelease` and `pressing` variables with values from 1 to 3, depending on the action of the buttons on the mouse. Also, emulates one touch on the screen.
+Enables mouse listener. Modifies the `mouse` object values with the respective mouse position on the canvas, and the `lastPress`, `lastRelease` and `pressing` variables with values from 1 to 3, depending on the action of the buttons on the mouse. Also, emulates one touch on the screen.
 
 #### Input.enableOrientation
 ```idl
@@ -1702,7 +1744,7 @@ Enables orientation listener on supported devices. Modifies the `orientation` ob
 ```idl
 void enableTouch(void)
 ```
-Enables screen touch listener on supported devices. Modifies the `touches` objects values with the respective touch position on the game screen. Also emulates the mouse movement and left click.
+Enables screen touch listener on supported devices. Modifies the `touches` objects values with the respective touch position on the canvas. Also emulates the mouse movement and left click.
 
 #### Input.disableAcceleration
 ```idl
@@ -1851,13 +1893,13 @@ World is an static pseudo-class containing all the elements for the current worl
 ```idl
 long width
 ```
-The width of the world. Going beyond this point is considered as goind out of the world, and should be managed as a sprite killer or to return it to the game area. This value is taken by the Camera as the furthest point it can move automatically in the horizontal axis.
+The width of the world. Going beyond this point is considered as goind out of the world, and should be managed as a sprite killer or to return it to the world area. This value is taken by the Camera as the furthest point it can move automatically in the horizontal axis.
 
 #### World.height
 ```idl
 long height
 ```
-The height of the world. Going beyond this point is considered as goind out of the world, and should be managed as a sprite killer or to return it to the game area. This value is taken by the Camera as the furthest point it can move automatically in the vertical axis.
+The height of the world. Going beyond this point is considered as goind out of the world, and should be managed as a sprite killer or to return it to the world area. This value is taken by the Camera as the furthest point it can move automatically in the vertical axis.
 
 #### World.map
 ```idl
@@ -1931,12 +1973,12 @@ Manually sets the size of the current world.
 
 ## cojsge_defs.js
 
-To make easier some tasks with COJSGE, there is a second optional file included, called `cojsge_defs`. It includes definitions to the values of the keyboard keys, the mouse buttons and the fullscreen modes to set in the COGJSGE Game Class on it's creation. As you can access the numeric values directly, these definitions can make the coding of your game an easier task.
+To make easier some tasks with COJSGE, there is a second optional file included, called `cojsge_defs`. It includes definitions to the values of the keyboard keys, the mouse buttons and the fullscreen modes to set in the COGJSGE `Canvas` Class on it's creation. As you can access the numeric values directly, these definitions can make the coding of your project an easier task.
 
-Feel free to explore the file, so you can know the options you have when making a game, or as a cheat code to the common numeric values of the mouse and keyboard buttons.
+Feel free to explore the file, so you can know the options you have when making a project, or as a cheat code to the common numeric values of the mouse and keyboard buttons.
 
 ### Fullscreen Mode
-The second parameter when creating a new game is the Fullscreen Mode; there are 7 types of Fullscreen Mode for scale in COJSGE. The first 3 are static scale, that means, the proportion of the game will be kept the same. The remaining 4 are dynamic, which changes the proportion of the game to better fit the screen, but use these carefully and test thoroughly, as it may cause unexpected behaviour.
+The second parameter when creating a new `Canvas` is the Fullscreen Mode; there are 7 types of Fullscreen Mode for scale in COJSGE. The first 3 are static scale, that means, the proportion of the canvas will be kept the same. The remaining 4 are dynamic, which changes the proportion of the canvas to better fit the screen, but use these carefully and test thoroughly, as it may cause unexpected behaviour.
 
 **Static scale**  
 0 is FULLSCREEN_NORMAL - Bars of `BackgroundColor` will be added if needed.  

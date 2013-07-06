@@ -11,29 +11,23 @@ Math.DEG=Math.PI/180;
 Array.prototype.insert=function(i,element){this.splice(i,0,element);}
 Array.prototype.remove=function(i){return this.splice(i,1)[0];}
 Array.prototype.removeAll=function(){this.length=0;}
-function onReady(){}
-function game(){}
-function paint(ctx){ctx.fillText('It\'s Working!\nCOJSGE 0.9',20,30);}
 function random(max){return Math.random()*max;}
 
-window.requestAnimFrame=(function(){
-	return window.requestAnimationFrame || 
-		window.webkitRequestAnimationFrame || 
-		window.mozRequestAnimationFrame || 
-		window.oRequestAnimationFrame || 
-		window.msRequestAnimationFrame || 
-		function(callback){window.setTimeout(callback,17);};
-})(); 
-
-//	Game.js
-function Game(canvasId,_fullMode,autoFull,autoFullOnMobile){
+//	Canvas.js
+function Canvas(canvasId,_fullMode,autoFull,autoFullOnMobile){
+	var self=this;
 	var dbuff=document.createElement('canvas');
-	var bgcolor='#ccc',bgimg=null,bgfixed=false,interval=16.7;
+	var bgcolor='#ccc',bgimg=null,bgfixed=false;
+	var async=true,interval=1000/60;
 	var time=0,acumDt=0;
 	var ifs=false,windowWidth=0,windowHeight=0,oStageWidth=0,oStageHeight=0;
 	fullMode=_fullMode;
 	if(autoFull==null)autoFull=true;
 	if(autoFullOnMobile==null)autoFullOnMobile=true;
+	
+	this.onReady=function(){};
+	this.act=function(){};
+	this.paint=function(ctx){ctx.fillText('It\'s Working!\nCOJSGE 0.9',20,30);}
 	window.addEventListener('load',init,false);
 
 	function init(){
@@ -45,7 +39,7 @@ function Game(canvasId,_fullMode,autoFull,autoFullOnMobile){
 		oStageHeight=stage.height;
 		ctx=stage.getContext('2d');
 		World.setSize(oStageWidth,oStageHeight);
-		onReady();
+		self.onReady();
 		run();
 	}
 
@@ -56,7 +50,15 @@ function Game(canvasId,_fullMode,autoFull,autoFullOnMobile){
 			bgimg=image;
 			bgfixed=(fixed==null)?false:fixed;
 		}
-		else if(window.cosole)console.error('Data missing in Game.setBackground(color[,image,fixed])');
+		else if(window.cosole)console.error('Data missing in Canvas.setBackground(color[,image,fixed])');
+	}
+	
+	this.setAsync=function(a){
+		async=a;
+	}
+	
+	this.getAsync=function(){
+		return async;
 	}
 	
 	this.setInterval=function(i){
@@ -73,25 +75,33 @@ function Game(canvasId,_fullMode,autoFull,autoFullOnMobile){
 
 	function run(){
 		//setTimeout(run,interval);
-		window.requestAnimFrame(run);
-		var now=new Date().getTime();
-		var dt=now-(time || now);
-		time=now;
-		acumDt+=dt;
-		
-		while(acumDt>interval){
-			game();
-			if(acumDt<5000)acumDt-=interval;
-			else acumDt=0
-			if(screenDebug)debug.aframes++;
+		requestAnimFrame(run);
+		if(async||screenDebug){
+			var now=new Date().getTime();
+			var dt=now-(time || now);
+			time=now;
+			acumDt+=dt;
+			if(screenDebug){
+				debug.frames++;
+				debug.run(dt);
+			}
 		}
+		if(async){
+			while(acumDt>interval){
+				self.act();
+				if(acumDt<5000)acumDt-=interval;
+				else acumDt=0
+				if(screenDebug)debug.aframes++;
+			}
+		}
+		else
+			self.act();
+			
 		if(ifs!=isFullscreen||windowWidth!=window.innerWidth||windowHeight!=window.innerHeight){
 			resize();
 		}
 		repaint();
 		if(screenDebug){
-			debug.frames++;
-			debug.run(dt);
 			debug.paint(ctx);
 		}
 	}
@@ -170,7 +180,7 @@ function Game(canvasId,_fullMode,autoFull,autoFullOnMobile){
 			if(bgfixed)Util.fillTile(g2,bgimg);
 			else Util.fillTile(g2,bgimg,-Camera.x,-Camera.y);
 		}
-		paint(g2);
+		self.paint(g2);
 		ctx.drawImage(dbuff,0,0,stage.width,stage.height);
 	}
 	
@@ -216,6 +226,15 @@ function Game(canvasId,_fullMode,autoFull,autoFullOnMobile){
 			ctx.textAlign='left';
 		}
 	}
+	
+	var requestAnimFrame=(function(){
+		return window.requestAnimationFrame || 
+			window.webkitRequestAnimationFrame || 
+			window.mozRequestAnimationFrame || 
+			window.oRequestAnimationFrame || 
+			window.msRequestAnimationFrame || 
+			function(callback){window.setTimeout(callback,17);};
+	})();
 }
 //	Animation.js
 function Animation(_img,_frameWidth,_frameHeight,_framesPerImage){
@@ -395,294 +414,6 @@ function Button(_x,_y,_width,_height){
 		else if(window.cosole)console.error('Data missing in Button.draw(ctx[,img,offsetX,offsetY])');
 	}
 }
-//	Camera.js
-var Camera=new function(){
-	this.x=0;
-	this.y=0;
-	
-	this.focus=function(spr,slide,ox,oy){
-		if(spr!=null){
-			slide=(isNaN(slide))?0:slide;
-			ox=(isNaN(ox))?0:ox;
-			oy=(isNaN(oy))?ox:oy;
-			var cx=spr.getCenterX()-stage.width/2;
-			var cy=spr.getCenterY()-stage.height/2;
-			if(World.width<stage.width||World.width-ox*2<stage.width){
-				this.x=World.width/2-stage.width/2;
-			}
-			else{
-				if(slide&&Math.abs(cx-this.x)>slide){
-					if(cx>this.x)
-						this.x+=slide;
-					else
-						this.x-=slide;
-				}
-				else
-					this.x=cx;
-				if(!World.loopX){
-					if(this.x<ox)
-						this.x=ox;
-					else if(this.x>World.width-stage.width-ox)
-						this.x=World.width-stage.width-ox;
-				}
-			}
-			if(World.height<stage.height||World.height-oy*2<stage.height){
-				this.y=World.height/2-stage.height/2;
-			}
-			else{
-				if(slide&&Math.abs(cy-this.y)>slide){
-					if(cy>this.y)
-						this.y+=slide;
-					else
-						this.y-=slide;
-				}
-				else
-					this.y=cy;
-				if(!World.loopY){
-					if(this.y<oy)
-						this.y=oy;
-					else if(this.y>World.height-stage.height-oy)
-						this.y=World.height-stage.height-oy;
-				}
-			}
-		}
-		else if(window.cosole)console.error('Data missing in Camera.focus(spr[,slide,offsetX,offsetY])');
-	}
-}
-//	Input.js
-var Input=new function(){
-	this.lastPress=null;
-	this.lastTouchPress=null;
-	this.lastTouchRelease=null;
-	this.pressing=[];
-	this.touches=[];
-	
-	this.acceleration=new function(){
-		this.x=0;
-		this.y=0;
-		this.z=0;
-	}
-	
-	this.mouse=new function(){
-		this.x=0;
-		this.y=0;
-
-		this.draw=function(ctx){
-			if(ctx!=null){
-				if(Input.pressing[1])
-					ctx.strokeStyle='#fff';
-				else
-					ctx.strokeStyle='#f00';
-				ctx.beginPath();
-				ctx.arc(this.x,this.y,5,0,Math.PI*2,true);
-				ctx.moveTo(this.x-5,this.y);
-				ctx.lineTo(this.x+5,this.y);
-				ctx.moveTo(this.x,this.y-5);
-				ctx.lineTo(this.x,this.y+5);
-				ctx.closePath();
-				ctx.stroke();
-			}
-			else if(window.cosole)console.error('Data missing in Input.mouse.draw(ctx)');
-		}
-	}
-	
-	this.orientation=new function(){
-		this.alpha=0;
-		this.beta=0;
-		this.gamma=0;
-	}
-	
-	this.enableAcceleration=function(){
-		window.addEventListener('devicemotion',DeviceMotion,false);
-	}
-
-	this.enableKeyboard=function(){
-		document.addEventListener('keydown',KeyDown,false);
-		document.addEventListener('keyup',KeyUp,false);
-	}
-	
-	this.enableMouse=function(){
-		stage.addEventListener('contextmenu',MousePrevent,false);
-		stage.addEventListener('mousedown',MouseDown,false);
-		document.addEventListener('mouseup',MouseUp,false);
-		document.addEventListener('mousemove',MouseMove,false);
-	}
-	
-	this.enableOrientation=function(){
-		window.addEventListener('deviceorientation',DeviceOrientation,false);
-	}
-	
-	this.enableTouch=function(){
-		stage.addEventListener('touchstart',TouchStart,false);
-		stage.addEventListener('touchend',TouchEnd,false);
-		stage.addEventListener('touchcancel',TouchEnd,false);
-		stage.addEventListener('touchmove',TouchMove,false);
-	}
-	
-	this.disableAcceleration=function(){
-		window.removeEventListener('devicemotion',DeviceMotion,false);
-	}
-
-	this.disableKeyboard=function(){
-		document.removeEventListener('keydown',KeyDown,false);
-		document.removeEventListener('keyup',KeyUp,false);
-	}
-	
-	this.disableMouse=function(){
-		stage.removeEventListener('contextmenu',MousePrevent,false);
-		stage.removeEventListener('mousedown',MouseDown,false);
-		document.removeEventListener('mouseup',MouseUp,false);
-		document.removeEventListener('mousemove',MouseMove,false);
-	}
-	
-	this.disableOrientation=function(){
-		window.removeEventListener('deviceorientation',DeviceOrientation,false);
-	}
-	
-	this.disableTouch=function(){
-		stage.removeEventListener('touchstart',TouchStart,false);
-		stage.removeEventListener('touchend',TouchEnd,false);
-		stage.removeEventListener('touchcancel',TouchEnd,false);
-		stage.removeEventListener('touchmove',TouchMove,false);
-	}
-	
-	function DeviceMotion(evt){
-		Input.acceleration.x=evt.accelerationIncludingGravity.x;
-		Input.acceleration.y=evt.accelerationIncludingGravity.y;
-		Input.acceleration.z=evt.accelerationIncludingGravity.z;
-	}
-	
-	function DeviceOrientation(evt){
-		Input.orientation.alpha=evt.alpha;
-		Input.orientation.beta=evt.beta;
-		Input.orientation.gamma=evt.gamma;
-	}
-	
-	function KeyDown(evt){
-		if(!Input.pressing[evt.keyCode])
-			Input.lastPress=evt.keyCode;
-		Input.pressing[evt.keyCode]=true;
-		if(Input.lastPress>=37&&Input.lastPress<=40)
-			evt.preventDefault();
-	}
-	
-	function KeyUp(evt){
-		Input.lastRelease=evt.keyCode;
-		Input.pressing[evt.keyCode]=false;
-	}
-	
-	function MousePrevent(evt){
-		evt.stopPropagation();
-		evt.preventDefault();
-	}
-	
-	function MouseDown(evt){
-		new MousePrevent(evt);
-		Input.lastPress=evt.which;
-		Input.pressing[evt.which]=true;
-		if(Input.touches.length==0){
-			Input.touches.push(new vtouch(0,Input.mouse.x,Input.mouse.y));
-			Input.lastTouchPress=0;
-		}
-	}
-	
-	function MouseUp(evt){
-		Input.lastRelease=evt.which;
-		Input.pressing[evt.which]=false;
-		if(Input.touches.length>0){
-			Input.touches.length=0;
-			Input.lastTouchRelease=0;
-		}
-	}
-	
-	function MouseMove(evt){
-		Input.mouse.x=screen2stageX(evt.pageX);
-		Input.mouse.y=screen2stageY(evt.pageY);
-		if(Input.touches.length>0){
-			Input.touches[0].x=Input.mouse.x;
-			Input.touches[0].y=Input.mouse.y;
-		}
-	}
-	
-	function TouchStart(evt){
-		evt.preventDefault();
-		var t=evt.changedTouches;
-		for(var i=0,l=t.length;i<l;i++){
-			Input.touches.push(new vtouch(t[i].identifier,screen2stageX(t[i].pageX),screen2stageY(t[i].pageY)));
-			Input.lastTouchPress=t[i].identifier;
-		}
-		if(!Input.pressing[1])
-			Input.lastPress=1;
-		Input.pressing[1]=true;
-		Input.mouse.x=Input.touches[0].x;
-		Input.mouse.y=Input.touches[0].y;
-	}
-	
-	function TouchEnd(evt){
-		evt.preventDefault();
-		var t=evt.changedTouches;
-		for(var i=0,l=t.length;i<l;i++){
-			for(var j=0,m=Input.touches.length;j<m;j++){
-				if(Input.touches[j].id==t[i].identifier){
-					Input.touches.remove(j--);
-					Input.lastTouchRelease=t[i].identifier;
-					m--;
-				}
-			}
-		}
-		Input.lastRelease=1;
-		Input.pressing[1]=false;
-	}
-	
-	function TouchMove(evt){
-		evt.preventDefault();
-		var t=evt.targetTouches;
-		for(var i=0,l=t.length;i<l;i++){
-			for(var j=0,m=Input.touches.length;j<m;j++){
-				if(Input.touches[j].id==t[i].identifier){
-					Input.touches[j].x=screen2stageX(t[i].pageX);
-					Input.touches[j].y=screen2stageY(t[i].pageY);
-				}
-			}
-		}
-		Input.mouse.x=Input.touches[0].x;
-		Input.mouse.y=Input.touches[0].y;
-	}
-	
-	function screen2stageX(evtX){
-		if(isFullscreen&&fullMode==2){
-			return ~~(evtX*stage.width/window.innerWidth);
-		}
-		else{
-			return ~~(~~(evtX+document.body.scrollLeft-stage.offsetLeft)/stageScale);
-		}
-	}
-	
-	function screen2stageY(evtY){
-		if(isFullscreen&&fullMode==2){
-			return ~~(evtY*stage.height/window.innerHeight);
-		}
-		else{
-			return ~~(~~(evtY+document.body.scrollTop-stage.offsetTop)/stageScale);
-		}
-	}
-
-	function vtouch(id,x,y){
-		this.id=id||0;
-		this.x=x||0;
-		this.y=y||0;
-
-		this.draw=function(ctx){
-			if(ctx!=null){
-				ctx.strokeStyle='#999';
-				ctx.beginPath();
-				ctx.arc(this.x,this.y,10,0,Math.PI*2,true);
-				ctx.stroke();
-			}
-			else if(window.cosole)console.error('Data missing in Input.touch['+this.id+'].draw(ctx)');
-		}
-	}
-}
 //	Particle.js
 function Particle(_x,_y,_diameter,_life,_speed,_angle,_colorStart,_colorEnd){
 	this.x=0;
@@ -715,11 +446,11 @@ function Particle(_x,_y,_diameter,_life,_speed,_angle,_colorStart,_colorEnd){
 			if(_colorEnd!=null){
 				var cStart=hex2rgb(_colorStart);
 				var cEnd=hex2rgb(_colorEnd);
-				var red=(cStart[0]-cEnd[0])/(_life+1);
-				var green=(cStart[1]-cEnd[1])/(_life+1);
-				var blue=(cStart[2]-cEnd[2])/(_life+1);
+				var red=~~((cStart[0]-cEnd[0])/(_life+1));
+				var green=~~((cStart[1]-cEnd[1])/(_life+1));
+				var blue=~~((cStart[2]-cEnd[2])/(_life+1));
 				for (var i=0;i<_life;i++)
-					this.colorList.push(rgb2hex(cStart[0]-(i*red),cStart[1]-(i*green),cStart[2]-(i*blue)));
+					this.colorList.push('rgb('+(cStart[0]-(i*red))+','+(cStart[1]-(i*green))+','+(cStart[2]-(i*blue))+')');
 			}
 			return true;
 		}
@@ -731,28 +462,32 @@ function Particle(_x,_y,_diameter,_life,_speed,_angle,_colorStart,_colorEnd){
 	this.Particle(_x,_y,_diameter,_life,_speed,_angle,_colorStart,_colorEnd);
 
 	function hex2rgb(h){
-		var c=[];
-		h=(h.charAt(0)=='#')? h.substring(1,7):h;
-		if(h.length==3){
-			c[0]=parseInt(h.charAt(0),16)*17;
-			c[1]=parseInt(h.charAt(1),16)*17;
-			c[2]=parseInt(h.charAt(2),16)*17;
+		if(h.charAt(0)=='#'){
+			var c=[];
+			h=h.substring(1,7);
+			if(h.length==3){
+				c[0]=parseInt(h.charAt(0),16)*17;
+				c[1]=parseInt(h.charAt(1),16)*17;
+				c[2]=parseInt(h.charAt(2),16)*17;
+			}
+			else{
+				c[0]=parseInt(h.substr(0,2),16);
+				c[1]=parseInt(h.substr(2,2),16);
+				c[2]=parseInt(h.substr(4,2),16);
+			}
+			return c;
 		}
-		else{
-			c[0]=parseInt(h.substr(0,2),16);
-			c[1]=parseInt(h.substr(2,2),16);
-			c[2]=parseInt(h.substr(4,2),16);
-		}
-		return c;
+		else if(window.console)console.log('Error: Color is not hexadecimal');
+		return [0,0,0];
 	}
 
-	function rgb2hex(r,g,b){return '#'+clr2hex(r)+clr2hex(g)+clr2hex(b);}
+	/*function rgb2hex(r,g,b){return '#'+clr2hex(r)+clr2hex(g)+clr2hex(b);}
 	function clr2hex(n){
 		n=parseInt(n,10);
 		if(isNaN(n)) return '00';
 		n=Math.max(0,Math.min(n,255));
 		return '0123456789ABCDEF'.charAt((n-n%16)/16)+'0123456789ABCDEF'.charAt(n%16);
-	}
+	}*/
 }
 //	ParticleSystem.js
 function ParticleSystem(){
@@ -1049,7 +784,7 @@ function Sprite(_x,_y,_width,_height,_type){
 			if(hy!=null)
 				return this.contains(spr.x+hx,spr.y+hy);
 			else
-				return this.intersects(spr.x,spr.y,spr.getWidth(),spr.getHeight);
+				return this.intersects(spr.x,spr.y,spr.getWidth(),spr.getHeight());
 		}
 		else if(window.cosole)console.error('Data missing in Sprite.collisionBox(spr[,hotspotX,hotspotY])');
 		return false;
@@ -1059,14 +794,14 @@ function Sprite(_x,_y,_width,_height,_type){
 		var collision=0;
 		var closest=this.getDiameter()/2;
 		for (var i=0,l=World.map.length;i<l;i++){
-			var spr=World.map.getSprite(i);
+			var spr=World.map[i];
 			if(hy!=null)spr=new Sprite(spr.x+hx,spr.y+hy,0);
 			if(((type!=null)?type==spr.type:true)&&
 				this.x<spr.x+spr.getWidth()&&
 				this.x+this.getWidth()>spr.x&&
 				this.y<spr.y+spr.getHeight()&&
 				this.y+this.getHeight()>spr.y){
-			var d=this.distance(World.map.getSprite(i));
+			var d=this.distance(World.map[i]);
 				if(d<closest){
 					collision=i+1;
 					closest=d;
@@ -1081,13 +816,13 @@ function Sprite(_x,_y,_width,_height,_type){
 			var collision=0;
 			var closest=this.getDiameter()/2;
 			for (var i=0,l=World.map.length;i<l;i++){
-				var spr=World.map.getSprite(i);
+				var spr=World.map[i];
 				if(((exception!=null)?exception!=i:true)&&
 					this.x<spr.x+spr.getWidth()&&
 					this.x+this.getWidth()>spr.x&&
 					this.y<spr.y+spr.getHeight()&&
 					this.y+this.getHeight()>spr.y){
-				var d=this.distance(World.map.getSprite(i));
+				var d=this.distance(World.map[i]);
 					if(d<closest){
 						collision=i+1;
 						closest=d;
@@ -1105,7 +840,7 @@ function Sprite(_x,_y,_width,_height,_type){
 			var collision=0;
 			var closest=this.getDiameter()/2;
 			for (var i=0,l=World.map.length;i<l;i++){
-				var spr=World.map.getSprite(i);
+				var spr=World.map[i];
 				if(hy!=null)spr=new Sprite(spr.x+hx,spr.y+hy,0);
 				if(((exception!=null)?exception!=i:true)&&
 					spr.type>=typeMin&&
@@ -1114,7 +849,7 @@ function Sprite(_x,_y,_width,_height,_type){
 					this.x+this.getWidth()>spr.x&&
 					this.y<spr.y+spr.getHeight()&&
 					this.y+this.getHeight()>spr.y){
-				var d=this.distance(World.map.getSprite(i));
+				var d=this.distance(World.map[i]);
 					if(d<closest){
 						collision=i+1;
 						closest=d;
@@ -1132,7 +867,7 @@ function Sprite(_x,_y,_width,_height,_type){
 			var collision=0;
 			var closest=this.getDiameter()/2;
 			for (var i=0,l=World.map.length;i<l;i++){
-				var spr=World.map.getSprite(i);
+				var spr=World.map[i];
 				if(hy!=null)spr=new Sprite(spr.x+hx,spr.y+hy,0);
 				if(((exception!=null)?exception!=i:true)&&
 					((type!=null)?spr.type==spr.type:true)&&
@@ -1140,7 +875,7 @@ function Sprite(_x,_y,_width,_height,_type){
 					this.x+this.getWidth()>spr.x&&
 					this.y<spr.y+spr.getHeight()&&
 					this.y+this.getHeight()>spr.y){
-				var d=this.distance(World.map.getSprite(i));
+				var d=this.distance(World.map[i]);
 					if(d<closest){
 						if(newType>0){
 							collision=i+1;
@@ -1197,7 +932,7 @@ function Sprite(_x,_y,_width,_height,_type){
 }
 // SpriteSheet.js
 function SpriteSheet(_img,_spriteWidth,_spriteHeight){
-	this.img;
+	this.img=null;
 	var spriteWidth;
 	var spriteHeight;
 	
@@ -1250,7 +985,7 @@ function SpriteSheet(_img,_spriteWidth,_spriteHeight){
 			var h=(spr.hflip)?-1:1;
 			var v=(spr.vflip)?-1:1;
 			if(isNaN(row)&&this.img.width){
-				var ipr=col>Math.round(this.img.width/spriteWidth);
+				var ipr=Math.round(this.img.width/spriteWidth);
 				if(window.cosole)console.log('IPR: '+ipr)
 				if(col>ipr){
 					col=col%ipr;
@@ -1311,7 +1046,7 @@ function SpriteVector(){
 				if(map[a]>0){
 					var spr;
 					if(masterSprites!=null){
-						spr=new Sprite(masterSprites.getSprite(map[a]));
+						spr=new Sprite(masterSprites[map[a]]);
 						spr.setOrigin((a%cols)*width,~~(a/cols)*height);
 						spr.resetPosition();
 					}
@@ -1354,9 +1089,311 @@ function SpriteVector(){
 	}
 }
 SpriteVector.prototype=[];
+//	Input.js
+var Input=new function(){
+	this.lastPress=null;
+	this.lastTouchPress=null;
+	this.lastTouchRelease=null;
+	this.pressing=[];
+	this.touches=[];
+	
+	this.acceleration={
+		x:0,
+		y:0,
+		z:0
+	}
+	
+	this.mouse={
+		x:0,
+		y:0,
+		ox:0,
+		oy:0,
+
+		draw:function(ctx){
+			if(ctx!=null){
+				if(Input.pressing[1])
+					ctx.strokeStyle='#fff';
+				else
+					ctx.strokeStyle='#f00';
+				ctx.beginPath();
+				ctx.arc(this.x,this.y,5,0,Math.PI*2,true);
+				ctx.moveTo(this.x-5,this.y);
+				ctx.lineTo(this.x+5,this.y);
+				ctx.moveTo(this.x,this.y-5);
+				ctx.lineTo(this.x,this.y+5);
+				if(Input.pressing[1]){
+					ctx.moveTo(this.x,this.y);
+					ctx.lineTo(this.ox,this.oy);
+				}
+				ctx.closePath();
+				ctx.stroke();
+			}
+			else if(window.cosole)console.error('Data missing in Input.mouse.draw(ctx)');
+		}
+	}
+	
+	this.orientation={
+		alpha:0,
+		beta:0,
+		gamma:0
+	}
+	
+	this.enableAcceleration=function(){
+		window.addEventListener('devicemotion',DeviceMotion,false);
+	}
+
+	this.enableKeyboard=function(){
+		document.addEventListener('keydown',KeyDown,false);
+		document.addEventListener('keyup',KeyUp,false);
+	}
+	
+	this.enableMouse=function(){
+		stage.addEventListener('contextmenu',MousePrevent,false);
+		stage.addEventListener('mousedown',MouseDown,false);
+		document.addEventListener('mouseup',MouseUp,false);
+		document.addEventListener('mousemove',MouseMove,false);
+	}
+	
+	this.enableOrientation=function(){
+		window.addEventListener('deviceorientation',DeviceOrientation,false);
+	}
+	
+	this.enableTouch=function(){
+		stage.addEventListener('touchstart',TouchStart,false);
+		stage.addEventListener('touchend',TouchEnd,false);
+		stage.addEventListener('touchcancel',TouchEnd,false);
+		stage.addEventListener('touchmove',TouchMove,false);
+	}
+	
+	this.disableAcceleration=function(){
+		window.removeEventListener('devicemotion',DeviceMotion,false);
+	}
+
+	this.disableKeyboard=function(){
+		document.removeEventListener('keydown',KeyDown,false);
+		document.removeEventListener('keyup',KeyUp,false);
+	}
+	
+	this.disableMouse=function(){
+		stage.removeEventListener('contextmenu',MousePrevent,false);
+		stage.removeEventListener('mousedown',MouseDown,false);
+		document.removeEventListener('mouseup',MouseUp,false);
+		document.removeEventListener('mousemove',MouseMove,false);
+	}
+	
+	this.disableOrientation=function(){
+		window.removeEventListener('deviceorientation',DeviceOrientation,false);
+	}
+	
+	this.disableTouch=function(){
+		stage.removeEventListener('touchstart',TouchStart,false);
+		stage.removeEventListener('touchend',TouchEnd,false);
+		stage.removeEventListener('touchcancel',TouchEnd,false);
+		stage.removeEventListener('touchmove',TouchMove,false);
+	}
+	
+	function DeviceMotion(evt){
+		Input.acceleration.x=evt.accelerationIncludingGravity.x;
+		Input.acceleration.y=evt.accelerationIncludingGravity.y;
+		Input.acceleration.z=evt.accelerationIncludingGravity.z;
+	}
+	
+	function DeviceOrientation(evt){
+		Input.orientation.alpha=evt.alpha;
+		Input.orientation.beta=evt.beta;
+		Input.orientation.gamma=evt.gamma;
+	}
+	
+	function KeyDown(evt){
+		if(!Input.pressing[evt.keyCode])
+			Input.lastPress=evt.keyCode;
+		Input.pressing[evt.keyCode]=true;
+		if(Input.lastPress>=37&&Input.lastPress<=40)
+			evt.preventDefault();
+	}
+	
+	function KeyUp(evt){
+		Input.lastRelease=evt.keyCode;
+		Input.pressing[evt.keyCode]=false;
+	}
+	
+	function MousePrevent(evt){
+		evt.stopPropagation();
+		evt.preventDefault();
+	}
+	
+	function MouseDown(evt){
+		new MousePrevent(evt);
+		Input.lastPress=evt.which;
+		Input.pressing[evt.which]=true;
+		Input.mouse.ox=Input.mouse.x;
+		Input.mouse.oy=Input.mouse.y;
+		if(Input.touches.length==0){
+			Input.touches.push(new vtouch(0,Input.mouse.x,Input.mouse.y));
+			Input.lastTouchPress=0;
+		}
+	}
+	
+	function MouseUp(evt){
+		Input.lastRelease=evt.which;
+		Input.pressing[evt.which]=false;
+		if(Input.touches.length>0){
+			Input.touches.length=0;
+			Input.lastTouchRelease=0;
+		}
+	}
+	
+	function MouseMove(evt){
+		Input.mouse.x=screen2stageX(evt.pageX);
+		Input.mouse.y=screen2stageY(evt.pageY);
+		if(Input.touches.length>0){
+			Input.touches[0].x=Input.mouse.x;
+			Input.touches[0].y=Input.mouse.y;
+		}
+	}
+	
+	function TouchStart(evt){
+		evt.preventDefault();
+		var t=evt.changedTouches;
+		for(var i=0,l=t.length;i<l;i++){
+			Input.touches.push(new vtouch(t[i].identifier,screen2stageX(t[i].pageX),screen2stageY(t[i].pageY)));
+			Input.lastTouchPress=t[i].identifier;
+		}
+		if(!Input.pressing[1])
+			Input.lastPress=1;
+		Input.pressing[1]=true;
+		Input.mouse.ox=Input.touches[0].x;
+		Input.mouse.oy=Input.touches[0].y;
+		Input.mouse.x=Input.mouse.ox;
+		Input.mouse.y=Input.mouse.oy;
+	}
+	
+	function TouchEnd(evt){
+		evt.preventDefault();
+		var t=evt.changedTouches;
+		for(var i=0,l=t.length;i<l;i++){
+			for(var j=0,m=Input.touches.length;j<m;j++){
+				if(Input.touches[j].id==t[i].identifier){
+					Input.touches.remove(j--);
+					Input.lastTouchRelease=t[i].identifier;
+					m--;
+				}
+			}
+		}
+		Input.lastRelease=1;
+		Input.pressing[1]=false;
+	}
+	
+	function TouchMove(evt){
+		evt.preventDefault();
+		var t=evt.targetTouches;
+		for(var i=0,l=t.length;i<l;i++){
+			for(var j=0,m=Input.touches.length;j<m;j++){
+				if(Input.touches[j].id==t[i].identifier){
+					Input.touches[j].x=screen2stageX(t[i].pageX);
+					Input.touches[j].y=screen2stageY(t[i].pageY);
+				}
+			}
+		}
+		Input.mouse.x=Input.touches[0].x;
+		Input.mouse.y=Input.touches[0].y;
+	}
+	
+	function screen2stageX(evtX){
+		if(isFullscreen&&fullMode==2){
+			return ~~(evtX*stage.width/window.innerWidth);
+		}
+		else{
+			return ~~(~~(evtX+document.body.scrollLeft-stage.offsetLeft)/stageScale);
+		}
+	}
+	
+	function screen2stageY(evtY){
+		if(isFullscreen&&fullMode==2){
+			return ~~(evtY*stage.height/window.innerHeight);
+		}
+		else{
+			return ~~(~~(evtY+document.body.scrollTop-stage.offsetTop)/stageScale);
+		}
+	}
+
+	function vtouch(id,x,y){
+		this.id=id||0;
+		this.x=x||0;
+		this.y=y||0;
+		this.ox=this.x;
+		this.oy=this.y;
+
+		this.draw=function(ctx){
+			if(ctx!=null){
+				ctx.strokeStyle='#999';
+				ctx.beginPath();
+				ctx.arc(this.x,this.y,10,0,Math.PI*2,true);
+				ctx.moveTo(this.x,this.y);
+				ctx.lineTo(this.ox,this.oy);
+				ctx.stroke();
+			}
+			else if(window.cosole)console.error('Data missing in Input.touch['+this.id+'].draw(ctx)');
+		}
+	}
+}
+//	Camera.js
+var Camera={
+	x:0,
+	y:0,
+	
+	focus:function(spr,slide,ox,oy){
+		if(spr!=null){
+			slide=(isNaN(slide))?0:slide;
+			ox=(isNaN(ox))?0:ox;
+			oy=(isNaN(oy))?ox:oy;
+			var cx=spr.getCenterX()-stage.width/2;
+			var cy=spr.getCenterY()-stage.height/2;
+			if(World.width<stage.width||World.width-ox*2<stage.width){
+				this.x=World.width/2-stage.width/2;
+			}
+			else{
+				if(slide&&Math.abs(cx-this.x)>slide){
+					if(cx>this.x)
+						this.x+=slide;
+					else
+						this.x-=slide;
+				}
+				else
+					this.x=cx;
+				if(!World.loopX){
+					if(this.x<ox)
+						this.x=ox;
+					else if(this.x>World.width-stage.width-ox)
+						this.x=World.width-stage.width-ox;
+				}
+			}
+			if(World.height<stage.height||World.height-oy*2<stage.height){
+				this.y=World.height/2-stage.height/2;
+			}
+			else{
+				if(slide&&Math.abs(cy-this.y)>slide){
+					if(cy>this.y)
+						this.y+=slide;
+					else
+						this.y-=slide;
+				}
+				else
+					this.y=cy;
+				if(!World.loopY){
+					if(this.y<oy)
+						this.y=oy;
+					else if(this.y>World.height-stage.height-oy)
+						this.y=World.height-stage.height-oy;
+				}
+			}
+		}
+		else if(window.cosole)console.error('Data missing in Camera.focus(spr[,slide,offsetX,offsetY])');
+	}
+};
 //	Util.js
-var Util=new function(){
-	this.getAngle=function(x1,y1,x2,y2){
+var Util={
+	getAngle:function(x1,y1,x2,y2){
 		if(y2!=null){
 			var angle=(Math.atan2(y1-y2,x1-x2))/Math.DEG+90;
 			if(angle>360)angle-=360;
@@ -1364,26 +1401,26 @@ var Util=new function(){
 			return angle;
 		}
 		else if(window.cosole)console.error('Data missing in Util.getAngle(x1,y1,x2,y2)');
-	}
+	},
 
-	this.getDistance=function(x1,y1,x2,y2){
+	getDistance:function(x1,y1,x2,y2){
 		if(y2!=null){
 			var dx=x1-x2;
 			var dy=y1-y2;
 			return (Math.sqrt(dx*dx+dy*dy));
 		}
 		else if(window.cosole)console.error('Data missing in Util.getDistance(x1,y1,x2,y2)');
-	}
+	},
 
-	this.getImage=function(str){
+	getImage:function(str){
 		var img=new Image();
 		if(str!=null){
 			img.src=str;
 		}
 		return img;
-	}
+	},
 
-	this.getAudio=function(str){
+	getAudio:function(str){
 		var aud=new Audio();
 		if(str!=null){
 			if(aud.canPlayType('audio/ogg').replace(/no/,''))
@@ -1392,9 +1429,9 @@ var Util=new function(){
 				aud.src=str;
 		}
 		return aud;
-	}
+	},
 
-	this.fillTile=function(ctx,img,x,y,repeatx,repeaty){
+	fillTile:function(ctx,img,x,y,repeatx,repeaty){
 		if(img!=null&&img.width>0&&img.height>0){
 			var a=0,b=0;
 			x=(isNaN(x))?0:x;
@@ -1430,16 +1467,16 @@ var Util=new function(){
 		}
 		else if(window.cosole)console.error('Data missing in Util.fillTile(ctx,img[,x,y,repeatX,repeatY])');
 	}
-}
+};
 //	World.js
-var World=new function(){
-	this.width=0;
-	this.height=0;
-	this.map=new SpriteVector();
-	this.loopX=false;
-	this.loopY=false;
+var World={
+	width:0,
+	height:0,
+	map:new SpriteVector(),
+	loopX:false,
+	loopY:false,
 
-	this.setMap=function(map,cols,width,height){
+	setMap:function(map,cols,width,height){
 		if(width!=null){
 			height=(isNaN(height))?width:height;
 			this.width=cols*width;
@@ -1448,17 +1485,17 @@ var World=new function(){
 			this.map.addMap(map,cols,width,height);
 		}
 		else if(window.cosole)console.error('Data missing in World.setMap(map,cols,width[,height])');
-	}
+	},
 
-	this.setSize=function(width,height){
+	setSize:function(width,height){
 		if(height!=null){
 			this.width=width;
 			this.height=height;
 		}
 		else if(window.cosole)console.error('Data missing in World.setSize(width,height)');
-	}
+	},
 
-	this.drawMap=function(ctx,img,deviation){
+	drawMap:function(ctx,img,deviation){
 		if(ctx!=null){
 			ctx.strokeStyle='#f00';
 			ctx.fillStyle='#f00';
@@ -1500,12 +1537,12 @@ var World=new function(){
 			if(screenDebug){
 				ctx.strokeStyle='#999';
 				ctx.strokeRect(-Camera.x,-Camera.y,Camera.width,Camera.height);
-				Input.mouse.draw(ctx);
 				for(var i=0,l=Input.touches.length;i<l;i++){
 					Input.touches[i].draw(ctx);
 				}
+				Input.mouse.draw(ctx);
 			}
 		}
 		else if(window.cosole)console.error('Data missing in World.drawMap(ctx[,img,imagesPerRow])');
 	}
-}
+};

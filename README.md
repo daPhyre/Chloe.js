@@ -19,7 +19,7 @@ The code included is:
  * example1.js 		- An example (source)
  * media 			- A folder containing all the media needed for the example
 
-In example1.js, you can switch the comments in line 140 for line 141 and in line 190 for 191 to explore fun effects.
+In example1.js, you can switch the comments in line 142 for line 143 and in line 193 for 194 to explore fun effects.
 
 Questions, Suggestions, Gratifications*?
 Contact the developer at webmaster@jugaa.me
