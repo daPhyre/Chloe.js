@@ -4,7 +4,7 @@
 
 COJSGE stands for Canvas Open JavaScript Game Engine. It is pronounced as COJ'SGE (Very similar to "coshge", with a soft g as in "get").
 
-COJSGE is intended to be a practical easy-to-use engine for developing games for desktop and mobile with HTML5 Canvas + JavaScript, but can also be used for any project using this technology. Current version is 0.9.
+COJSGE is intended to be a practical easy-to-use engine for developing games for desktop and mobile with HTML5 Canvas + JavaScript, but can also be used for any project using this technology. Current version is 1.0.
 
 ## Use
 
@@ -15,13 +15,14 @@ var myCanvas=new Canvas();
 
 myCanvas.onReady=function(){
 	// Start your variables here
+	var myScene=new Scene();
 	
-	myCanvas.act=function(){
+	myScene.act=function(){
 		// This is your actions loop. Move your objects here.
 		
 	}
 	
-	myCanvas.paint=function(ctx){
+	myScene.paint=function(ctx){
 		// This is your render loop. Draw your objects here.
 		
 	}
@@ -51,15 +52,17 @@ The current pseudo-classes in COJSGE are these:
  * [Canvas](#canvas)
  * [Animation] (#animation)
  * [Button] (#button)
+ * [Camera] (#camera)
  * [Particle] (#particle)
  * [ParticleSystem] (#particlesystem)
+ * [Scene] (#scene)
  * [Sprite] (#sprite)
  * [SpriteSheet] (#spritesheet)
  * [SpriteVector] (#spritevector)
 
 Static pseudo-classes:
- * [Camera] (#camera)
  * [Input] (#input)
+ * [Toast] (#toast)
  * [Util] (#util)
  * [World] (#world)
 
@@ -70,38 +73,16 @@ Before starting with the pseudo-classes, I'll introduce the "Public" variable an
 ### Public variables
 
 ```idl
-HTMLCanvasElement stage
+HTMLCanvasElement view
 ```
-The current canvas object set to the `Canvas`. Named "stage" instead of the generic "canvas" to prevent confunsion.
+The current canvas object set to the `Canvas`. Named "view" instead of the generic "canvas" to prevent confunsion.
 
 ```idl
-CanvasRenderingContext2D ctx
+boolean imageSmoothingEnabled
 ```
-The context of the current canvas. Direct use outside the paint loop is recomended only to display messages when non-asyncronous events may temporally freeze the `Canvas.paint` function.
-
-```idl
-boolean isFullscreen
-```
-Turns fullscreen mode on/off. Note: it fills the browser screen; it doesn't force the browser to enter into fullscreen (like when pressing F11).
-
-```idl
-boolean screenDebug
-```
-Turns screen debugging mode on/off. Turning on `screenDebug` shows tecnical info of your canvas in screen and all the collision bounds of all the elements in the canvas will be drawn over their respective images.
+A temporal workaround to switch canvas quality when scaled, while `CanvasRenderingContext2D.imageSmoothingEnable` becomes a web standard.
 
 ### Public functions
-#### random
-```idl
-double random(double max)
-```
-Small public util to get a random floating number from 0.0 to max. Should be parsed with `parseInt(random(max))` to get an integer number.
-
-**Parameters:**  
-*max* - The max number `random` should return.
-
-**Returns:**  
-A random floating number from 0.0 to `max`.
-
 #### Array
 COJSGE extends the `Array` elements, giving them the properties `insert(long position, object element)`, `remove(long position)` and `removeAll()`.
 
@@ -114,13 +95,21 @@ The `Canvas` pseudo-class starts the canvas with id "canvas", if no other ID is 
 
 | | **[Functions summary](#canvas-functions)** |
 | --- | --- |
-| void	| [act(void)](#canvasact)	|
+| boolean	| [getAsync(void)](#canvasgetasync)	|
+| boolean	| [getFullscreen(void)](#canvasgetfullscreen)	|
+| double	| [getInterval(void)](#canvasgetinterval)	|
 | void	| [getScreenshot(void)](#canvasgetscreenshot)	|
+| boolean	| [getScreenDebug(void)](#canvasgetscreendebug)	|
+| void	| [loadScene(Scene scene)](#canvasloadscene)	|
 | void	| [onReady(void)](#canvasonready)	|
-| void	| [paint(CanvasRenderingContext2D ctx)](#canvaspaint)	|
 | void	| [setAsync(boolean async)](#canvassetasync)	|
 | void	| [setBackground(DOMString color, optional DOMString image, optional boolean fixed)](#canvassetbackground)	|
+| void	| [setFullscreen(boolean fullscreen)](#canvassetfullscreen)	|
 | void	| [setInterval(double interval)](#canvassetinterval)	|
+| void	| [setScreenDebub(boolean debug)](#canvassetscreendebug)	|
+| void	| [toggleAsync(void)](#canvastoggleasync)	|
+| void	| [toggleFullscreen(void)](#canvastogglefullscreen)	|
+| void	| [toggleScreenDebug(void)](#canvastogglescreendebug)	|
 
 ### Canvas constructor
 #### Canvas.Canvas
@@ -139,11 +128,33 @@ Creates a new canvas with ID canvasID.
 *autoFullOnMobile* - Sets if the canvas will fill automatically the screen when the screen is smaller than the canvas bound, common default task on mobile devices.  
 
 ### Canvas functions
-#### Canvas.act
+#### Canvas.getAsync
+
 ```idl
-void act(void)
+boolean getAsync(void)
 ```
-The actions that happens frame after frame in the main loop. If `Canvas.async` is true, this is executed asynchronized from `Canvas.paint`, every `Canvas.interval` times (Default is 60 times per second). Else, it is called synchronized with `Canvas.paint`, every possible time that requestAnimationFrame allow.
+Gets if `Screen.act` is synchronized with `Screen.paint`, or regulated asynchronous by `Canvas.interval`.
+
+**Returns:**  
+Whether the actions are synchronized or not with the painting.
+
+#### Canvas.getFullscreen
+```idl
+boolean getFullscreen(void)
+```
+Gets if the canvas is filling the browser screen.
+
+**Returns:**  
+Whether the canvas is filling the browser screen.
+
+#### Canvas.getInterval
+```idl
+double getInterval(void)
+```
+Gets the time interval since the las cicle update.
+
+**Returns:**  
+The time interval since the las cicle update.
 
 #### Canvas.getScreenshot
 
@@ -152,26 +163,36 @@ void getScreenshot(void)
 ```
 Opens a new window with a PNG image screenshot of the canvas and the current frame. Seems to work only on server-side webpages.
 
+#### Canvas.getScreenDebug
+```idl
+boolean getScreenDebug(void)
+```
+Gets if screen debugging is active or not.
+
+**Returns:**  
+Whether the screen debugging is active or not.
+
+#### Canvas.loadScene
+```idl
+void loadScene(Scene scene)
+```
+Loads the given scene and sets it as the current one.
+
+**Parameters:**  
+*Scene* - The scene to be loaded.
+
 #### Canvas.onReady
 ```idl
 void onReady(void)
 ```
 Is called when the webpage is loaded and the canvas is ready to start.
 
-#### Canvas.paint
-```idl
-void paint(CanvasRenderingContext2D ctx)
-```
-Is called every possible time that requestAnimationFrame allow (Around 60 times per second, depends on device).
-**Parameters:**  
-*ctx* - The context to be used for painting.
-
 #### Canvas.setAsync
 
 ```idl
 void setAsync(boolean async)
 ```
-Sets if `Canvas.act` synchronized with `Canvas.paint`, or regulated asynchronous by `Canvas.interval`.
+Sets if `Screen.act` synchronized with `Screen.paint`, or regulated asynchronous by `Canvas.interval`.
 
 **Parameters:**  
 *async* - Whether the actions will be synchronized or not with the painting.
@@ -189,15 +210,54 @@ Sets the background properties.
 *image* - Image to be tiled in the canvas background.  
 *fixed* - Sets if the canvas background images will be fixed when the camera moves.
 
+#### Canvas.setFullscreen
+```idl
+void setFullscreen(boolean fullscreen)
+```
+Sets if the canvas will fill the browser screen. This does not force the browser to enter into fullscreen (like when pressing F11). This function won't work if either `autoFull` or `autoFullOnMobile` is true.
+
+**Parameters:**  
+*fullscreen* - Whether the screen will be filled. 
+
 #### Canvas.setInterval
 
 ```idl
 void setInterval(double interval)
 ```
-If `Canvas.async` is true (default), sets the time between calls to the `act` function.
+Sets the time between calls to the `act` function. If `Canvas.async` is false (default), it will automatically switch the asychronous mode on.
 
 **Parameters:**  
 *interval* - The time in miliseconds between calls. Default is 1000/60 (60 frames per second).
+
+#### Canvas.setScreenDebug
+```idl
+void setScreenDebug(boolean debug)
+```
+Sets if screen debugging is active or not. Turning on `screenDebug` shows tecnical info of your canvas in screen and all the collision bounds of all the elements in the canvas will be drawn over their respective images.
+
+**Parameters:**  
+*debug* - Whether the debug screen will be active or not.
+
+#### Canvas.toggleAsync
+
+```idl
+void toggleAsync(void)
+```
+Switches between synchronous and asynchronous mode.
+
+#### Canvas.toggleFullscreen
+
+```idl
+void toggleFullscreen(void)
+```
+Switches fullscreen mode between set and unset.
+
+#### Canvas.toggleScreenDebug
+
+```idl
+void toggleScreenDebug(void)
+```
+Switches screen debug between on and off.
 
 ## Animation
 While it is recomended to use personal SpriteSheets for more optimized games, this pseudo-class offers in contrast an easy and simple way to make animations in your game.
@@ -206,22 +266,25 @@ While it is recomended to use personal SpriteSheets for more optimized games, th
 | --- | --- |
 | Image	| [images](#animationimages)	|
 | long	| [currentFrame](#animationcurrentframe)	|
-| long	| [framesPerImage](#animationframesperimage)	|
 
 | **[Contructor summary](#animation-constructor)** |
 | --- |
-| [Animation(Image image, long frameWidth, optional long frameHeight, optional long framesPerImage)](#animationanimation)	|
+| [Animation(long framesPerSecond, Image image, long frameWidth, optional long frameHeight)](#animationanimation)	|
 
 | | **[Functions summary](#animation-functions)** |
 | --- | --- |
 | void	| [addFrame(Image img)](#animationaddframe)	|
 | void	| [draw(CanvasRenderingContext2D ctx, double x, double y, optional long row)](#animationdraw)	|
 | void	| [drawSprite(CanvasRenderingContext2D ctx, Sprite spr, optional double offsetX, optional double offsetY, optional long row)](#animationdrawsprite)	|
-| Image	| [getCurrentImage(void)](#animationgetcurrentimage)	|
 | long	| [getTotalFrames(void)](#animationgettotalframes)	|
-| long	| [getTotalImages(void)](#animationgettotalimages)	|
+| void	| [gotoFrame(long frame)](#animationgotoframe)	|
+| boolean	| [isPlaying(void)](#animationisplaying)	|
 | long	| [nextFrame(void)](#animationnextframe)	|
 | long	| [prevFrame(void)](#animationprevframe)	|
+| void	| [pause(void)](#animationpause)	|
+| void	| [play(void)](#animationplay)	|
+| void	| [setFPS(long framesPerSecond)](#animationsetfps)	|
+| void	| [update(double deltaTime)](#animationupdate)	|
 
 ### Animation variables
 #### Animation.images
@@ -236,27 +299,21 @@ long currentFrame
 ```
 Sets/gets the current frame of our animation.
 
-#### Animation.framesPerImage
-```idl
-long framesPerImage
-```
-Sets/gets the time in loops that need to be paused before passing to the next image in out animation. The bigger this value is, the slower the animation runs. Default is 0.
-
 ### Animation constructor
 #### Animation.Animation
 ```idl
-Animation(Image image,
+Animation(long framesPerSecond,
+		  Image image,
 		  long frameWidth,
-		  optional long frameHeight = null,
-		  optional long framesPerImage = 0)
+		  optional long frameHeight = null)
 ```
 Creates a new animation strip. If you want to use `Animation` as an animation array of images, you can construct it sending the first image array and a random frameWidth, or you can construct it sending nothing, through in this last case, your debugging console will display an error; just ignore it.
 
 **Parameters:**  
+*framesPerSecond* - The time before passing to the next image frame.  
 *image* - The image to be used as an animation strip.  
 *frameWidth* - The width of each frame in pixels.  
 *frameHeight* - If your animation strip contains several animation (Each one on a different row, and all with the same number of animation sprites), you must send here the height of the frame heights. Otherwise, just send `null`.  
-*framesPerImage* - The time in loops before passing to the next image.
 
 ### Animation functions
 #### Animation.addFrame
@@ -300,15 +357,6 @@ Draws the current frame on the given `CanvasRenderingContext2D` with the sprite 
 *offsetY* - The offset in the y coordinate to move the image from the sprite.  
 *row* - If the animation strip has different animations, select here the row to be drawn.
 
-#### Animation.getCurrentImage
-```idl
-Image getCurrentImage(void)
-```
-Gets the image of the current frame. If the animation is an strip animation, it will return the only image strip as a whole.
-
-**Returns:**  
-The image of the current frame.
-
 #### Animation.getTotalFrames
 ```idl
 long getTotalFrames(void)
@@ -318,20 +366,29 @@ Gets the total of frames within the animation.
 **Returns:**  
 The total of frames in `Animation`.
 
-#### Animation.getTotalImages
+#### Animation.gotoFrame
 ```idl
-long getTotalImages(void)
+void gotoFrame(long frame)
 ```
-Gets the total of images within the animation.
+Sets the current frame to the given position.
+
+**Parameters:**  
+*frame* - The frame number to go on the animation.
+
+#### Animation.isPlaying
+```idl
+boolean isPlaying(void)
+```
+Returns whether the animation is playing or not.
 
 **Returns:**  
-The total of images in `Animation`.
+Whether the animation is playing or not.
 
 #### Animation.nextFrame
 ```idl
 long nextFrame(void)
 ```
-Moves to the next frame in the animation and returns the current frame. This function should be called in `paint(ctx)` at least once in order to forward animate the animation.
+Moves to the next frame in the animation and returns the current frame.
 
 **Returns:**  
 The current frame after moving forward.
@@ -340,10 +397,40 @@ The current frame after moving forward.
 ```idl
 long prevFrame(void)
 ```
-Moves to the previous frame in the animation and returns current frame. This function should be called in `paint(ctx)` at least once in order to backward animate the animation.
+Moves to the previous frame in the animation and returns current frame.
 
 **Returns:**  
 The current frame after moving backward.
+
+#### Animation.pause
+```idl
+void pause(void)
+```
+Pauses the animation.
+
+#### Animation.play
+```idl
+void play(void)
+```
+Plays the animation.
+
+#### Animation.setFPS
+```idl
+void setFPS(long framesPerSecond)
+```
+Sets the time before passing to the next image frame.
+
+**Parameters:**  
+*framesPerSecond* - The time before passing to the next image frame.
+
+#### Animation.update
+```idl
+void update(double deltaTime)
+```
+Updates the animation given the time elapsed. It's called automatically every frame.
+
+**Parameters:**  
+*deltaTime* - The time elapsed since the last frame update.
 
 ## Button
 This pseudo-class makes a simple button, interactive only with the mouse. Buttons position are always relative to screen position instead of world position.
@@ -354,10 +441,13 @@ This pseudo-class makes a simple button, interactive only with the mouse. Button
 
 | | **[Functions summary](#button-functions)** |
 | --- | --- |
-| boolean	| [mouseOver(void)](#buttonmouseover)	|
-| boolean	| [mouseDown(void)](#buttonmousedown)	|
-| boolean	| [touch(void)](#buttontouch)	|
+| boolean	| [down(void)](#buttondown)	|
 | void	| [draw(CanvasRenderingContext2D ctx, optional Image img, optional double offsetX, optional double offsetY)](#buttondraw)	|
+| boolean	| [hit(void)](#buttonhit)	|
+| boolean	| [over(void)](#buttonover)	|
+| boolean	| [tap(void)](#buttontap)	|
+| boolean	| [touch(void)](#buttontouch)	|
+| boolean	| [up(void)](#buttonup)	|
 
 ### Button constructor
 #### Button.Button
@@ -376,32 +466,14 @@ Creates the new button within the specified bound of the rectangle sent.
 *height* - The height of the button. If no height is specified, it will take the value of width.
 
 ### Button functions
-#### Button.mouseOver
+#### Button.down
 ```idl
-boolean mouseOver(void)
+boolean down(void)
 ```
-Checks if the mouse cursor is over the button.
+Checks if the mouse left button or any touch is being pressed while the cursor is over the button.
 
 **Returns:**  
-`true` if the mouse cursor is over the button, `false` otherwise.
-
-#### Button.mouseDown
-```idl
-boolean mouseDown(void)
-```
-Checks if the mouse left button is being pressed while the cursor is over the button.
-
-**Returns:**  
-`true` if the mouse left button is being pressed while the cursor is over the button, `false` otherwise.
-
-#### Button.touch
-```idl
-boolean touch(void)
-```
-Checks if any screen touch is being holded over the button.
-
-**Returns:**  
-`true` if any screen touch is being holded over the button, `false` otherwise.
+`true` if the mouse left button or any touch is being pressed while the cursor is over the button, `false` otherwise.
 
 #### Button.draw
 ```idl
@@ -418,6 +490,116 @@ Draws the button in the given `CanvasRenderingContext2D`. If no image is specifi
 *offsetX* - The offset in the x coordinate to move the image from the button.  
 *offsetY* - The offset in the y coordinate to move the image from the button.
 
+#### Button.hit
+```idl
+boolean touch(void)
+```
+Checks if the mouse left button has been released over the button.
+
+**Returns:**  
+`true` if the mouse left button has been released over the button, `false` otherwise.
+
+#### Button.over
+```idl
+boolean over(void)
+```
+Checks if the mouse cursor or any touch is over the button.
+
+**Returns:**  
+`true` if the mouse cursor or any touch is over the button, `false` otherwise.
+
+#### Button.tap
+```idl
+boolean touch(void)
+```
+Checks if any screen touch has been pressed over the button.
+
+**Returns:**  
+`true` if any screen touch has been pressed over the button, `false` otherwise.
+
+#### Button.touch
+```idl
+boolean touch(void)
+```
+Checks if any screen touch is being holded over the button.
+
+**Returns:**  
+`true` if any screen touch is being holded over the button, `false` otherwise.
+
+#### Button.up
+```idl
+boolean up(void)
+```
+Checks if the mouse cursor or any touch is not over or pressing the button.
+
+**Returns:**  
+`true` if neither the mouse cursor or any touch is over or pressing the button, `false` otherwise.
+
+## Camera
+```idl
+static Camera()
+```
+Camera is a pseudo-class which holds the coordinates from where the screen elements will start to be drawn.
+
+| **[Contructor summary](#camera-constructor)** |
+| --- |
+| [Camera(optional boolean keepInWorld)](#cameracamera)	|
+
+| | **[Variables summary](#camera-variables)** |
+| --- | --- |
+| long	| [keepInWorld](#camerakeepinworld)	|
+| long	| [x](#camerax)	|
+| long	| [y](#cameray)	|
+
+| | **[Functions summary](#camera-functions)** |
+| --- | --- |
+| void	| [focus(Sprite spr, optional double slide, optional double offsetX, optional double offsetY)](#camerafocus)	|
+
+### Camera constructor
+#### Camera.Camera
+```idl
+Camera(optional boolean keepInWorld)
+```
+Creates the new camera.
+
+**Parameters:**  
+*keepInWorld* - Whether the camera will be contained all the time inside the world bounds. Default is `true`.
+
+### Camera variables
+#### Camera.keepinworld
+```idl
+boolean keepInWorld
+```
+Establishes whether the camera will be contained all the time inside the world bounds.
+
+#### Camera.x
+```idl
+long x
+```
+The x coordinate from which the screen elements will start to draw.
+
+#### Camera.y
+```idl
+long y
+```
+The y coordinate from which the screen elements will start to draw.
+
+### Camera functions
+#### Camera.focus
+```idl
+void focus(Sprite spr,
+		   optional double slide = 0,
+		   optional double offsetX = 0,
+		   optional double offsetY = 0)
+```
+The camera centers on the given sprite.
+
+**Parameters:**  
+*spr* - The sprite to which the camera will center.  
+*slide* - If this value is bigger than 0, the camera will slowly move `slide` pixels each loop until the sprite is centered.  
+*offsetX* - Horizontal distance from the world border to limit the camera movement. Negative values allow the camera to move beyond the world horizontal border.  
+*offsetY* - Vertical distance from the world border to limit the camera movement. Negative values allow the camera to move beyond the world vertical border. If no value is given, `offsetY` will take the value of `offsetX`.
+
 ## Particle
 Creates a new particle to be managed with the particle system.
 
@@ -428,8 +610,8 @@ Creates a new particle to be managed with the particle system.
 | double	| [ox](#particleox)	|
 | double	| [oy](#particleoy)	|
 | double	| [diameter](#particlediameter)	|
-| long	| [life](#particlelife)	|
-| long	| [olife](#particleolife)	|
+| double	| [life](#particlelife)	|
+| double	| [olife](#particleolife)	|
 | double	| [speed](#particlespeed)	|
 | double	| [angle](#particleangle)	|
 | double	| [rotation](#particlerotation)	|
@@ -438,7 +620,7 @@ Creates a new particle to be managed with the particle system.
 
 | **[Contructor summary](#particle-constructor)** |
 | --- |
-| [Particle(double x, double y, double diameter, long life, double speed, double angle, DOMString colorStart, optional DOMString colorEnd)](#particleparticle)	|
+| [Particle(double x, double y, double diameter, double life, double speed, double angle, DOMString colorStart, optional DOMString colorEnd)](#particleparticle)	|
 
 ### Particle variables
 #### Particle.x
@@ -474,13 +656,13 @@ The diameter of the particle.
 
 #### Particle.life
 ```idl
-long life
+double life
 ```
-The remaining time (in loops) before the particle vanishes.
+The remaining time (in seconds) before the particle vanishes.
 
 #### Particle.olife
 ```idl
-long olife
+double olife
 ```
 The original lifespan of the particle.
 
@@ -488,7 +670,7 @@ The original lifespan of the particle.
 ```idl
 double speed
 ```
-The speed of the particle, in pixels.
+The speed of the particle, in pixels per second.
 
 #### Particle.angle
 ```idl
@@ -520,7 +702,7 @@ An array containing all the colors to be assigned to the particle until it dies.
 Particle(double x,
 		 double y,
 		 double diameter,
-		 long life,
+		 double life,
 		 double speed,
 		 double angle,
 		 DOMString colorStart,
@@ -531,8 +713,8 @@ Creates a new particle with the given attributes.
 **Parameters:**  
 *x* - The center x coordinate of the particle.  
 *y* - The center x coordinate of the particle.  
-*life* - The lifespan of the particle.  
-*speed* - The speed of the particle, in pixels.  
+*life* - The lifespan of the particle, in seconds.  
+*speed* - The speed of the particle, in pixels per second.  
 *angle* - The moving angle of the particle.  
 *colorStart* - The beginning color of the particle.  
 *colorEnd* - If set, the particle will slowly turn from colorStart to colorEnd through its lifespan.
@@ -544,6 +726,7 @@ Contains an array of particles to be manipulated as one system.
 | | **[Variables summary](#particlesystem-variables)** |
 | --- | --- |
 | double	| [gravity](#particlesystemgravity)	|
+| boolean	| [moveOrigin](#particlesystemmoveorigin)	|
 | double	| [wind](#particlesystemwind)	|
 
 | **[Contructor summary](#particlesystem-constructor)** |
@@ -553,11 +736,12 @@ Contains an array of particles to be manipulated as one system.
 | | **[Functions summary](#particlesystem-functions)** |
 | --- | --- |
 | void	| [addParticle(Particle particle)](#particlesystemaddParticle)	|
-| void	| [addParticle(double x, double y, double diameter, long life, double speed, double angle, DOMString colorStart, optional DOMString colorEnd)](#particlesystemaddParticle)	|
-| void	| [moveParticles(void)](#particlesystemmoveParticles)	|
-| void	| [moveParticlesO(void)](#particlesystemmoveParticlesO)	|
+| void	| [addParticle(double x, double y, double diameter, double life, double speed, double angle, DOMString colorStart, optional DOMString colorEnd)](#particlesystemaddParticle)	|
 | void	| [drawParticles(CanvasRenderingContext2D ctx, optional boolean alpha, optional Image image)](#particlesystemdrawParticles)	|
 | void	| [drawParticlesO(CanvasRenderingContext2D ctx, optional boolean alpha)](#particlesystemdrawParticlesO)	|
+| void	| [moveParticles(void)](#particlesystemmoveParticles)	|
+| void	| [moveParticlesO(void)](#particlesystemmoveParticlesO)	|
+| void	| [update(double deltaTime)](#particlesystemupdate)	|
 
 ### ParticleSystem variables
 #### ParticleSystem.gravity
@@ -565,6 +749,12 @@ Contains an array of particles to be manipulated as one system.
 double gravity
 ```
 Sets/gets the constant vertical acceleration to the particles in the current particle system.
+
+#### ParticleSystem.moveorigin
+```idl
+boolean moveOrigin
+```
+Whether the origin of the particle should move with the particle. Effective for some visual effects.
 
 #### ParticleSystem.wind
 ```idl
@@ -604,23 +794,11 @@ Creates a new particle with the given attributes and then pushes it into the par
 **Parameters:**  
 *x* - The center x coordinate of the particle.  
 *y* - The center x coordinate of the particle.  
-*life* - The lifespan of the particle.  
-*speed* - The speed of the particle, in pixels.  
+*life* - The lifespan of the particle, in seconds.  
+*speed* - The speed of the particle, in pixels per second.  
 *angle* - The moving angle of the particle.  
 *colorStart* - The beginning color of the particle.  
 *colorEnd* - If set, the particle will slowly turn from colorStart to colorEnd through its lifespan.
-
-#### ParticleSystem.moveParticles
-```idl
-void moveParticles(void)
-```
-Moves the particles within the particle system.
-
-#### ParticleSystem.moveParticlesO
-```idl
-void moveParticlesO(void)
-```
-Moves each particle origin position within the particle system to the current particle position, and then moves the particle position. This function combined with `drawParticlesO` gives the particle system's particles a peculiar ray effect.
 
 #### ParticleSystem.drawParticles
 ```idl
@@ -646,6 +824,72 @@ Draws the particles within the particle system as lines, from the origin to thei
 *ctx* - The `CanvasRenderingContext2D` where the particles will be drawn.  
 *alpha* - If `true`, the particles will slowly fade out in transparency through its lifespan.
 
+#### ParticleSystem.moveParticles
+```idl
+void moveParticles(void)
+```
+Moves the particles within the particle system.
+
+#### ParticleSystem.moveParticlesO
+```idl
+void moveParticlesO(void)
+```
+Moves each particle origin position within the particle system to the current particle position, and then moves the particle position. This function combined with `drawParticlesO` gives the particle system's particles a peculiar ray effect.
+
+#### ParticleSystem.update
+```idl
+void update(double deltaTime)
+```
+Updates the particle system given the time elapsed. It's called automatically every frame.
+
+**Parameters:**  
+*deltaTime* - The time elapsed since the last frame update.
+
+## Scene
+This pseudo-class creates a scene to be drawn and manipulated on the main loop.
+
+| | **[Variables summary](#scene-variables)** |
+| --- | --- |
+| long	| [id](#sceneid)	|
+
+| | **[Functions summary](#scene-functions)** |
+| --- | --- |
+| void	| [load(void)](#sceneload)	|
+| void	| [act(deltaTime)](#sceneact)	|
+| void	| [paint(CanvasRenderingContext2D ctx)](#scenepaint)	|
+
+### Scene variables
+#### Scene.id
+```idl
+long id
+```
+The unique identifier for the scene. Should not be modified.
+
+### Scene functions
+#### Scene.load
+```idl
+void load(void)
+```
+Sets the tasks to be done when the scene loads. Will be called automatically when a scene is loaded with `Canvas.loadScene`.
+
+#### Scene.act
+```idl
+void act(deltaTime)
+```
+The actions that happens frame after frame in the main loop. If `Canvas.async` is true, this is executed asynchronized from `Scene.paint`, every `Canvas.interval` times (Default is 60 times per second). Else, it is called synchronized with `Scene.paint`, every possible time that requestAnimationFrame allow.
+
+**Parameters:**  
+*deltaTime* - The elapsed time since the last frame update.
+
+#### Scene.paint
+```idl
+void paint(CanvasRenderingContext2D ctx)
+```
+Is called every possible time that requestAnimationFrame allow (Around 60 times per second, depends on device).
+
+**Parameters:**  
+*ctx* - The context to be used for painting.
+
 ## Sprite
 This pseudo-class creates an element to be used in the game, interactive with other sprites.
 
@@ -657,6 +901,10 @@ This pseudo-class creates an element to be used in the game, interactive with ot
 | double	| [height](#spriteheight)	|
 | long	| [type](#spritetype)	|
 | long	| [health](#spritehealth)	|
+| double	| [left](#spriteleft)	|
+| double	| [right](#spriteright)	|
+| double	| [top](#spritetop)	|
+| double	| [bottom](#spritebottom)	|
 | double	| [vx](#spritevx)	|
 | double	| [vy](#spritevy)	|
 | double	| [ox](#spriteox)	|
@@ -666,10 +914,7 @@ This pseudo-class creates an element to be used in the game, interactive with ot
 | double	| [scale](#spritescale)	|
 | boolean	| [vflip](#spritevflip)	|
 | boolean	| [hflip](#spritehflip)	|
-| double	| [var1](#spritevar1)	|
-| double	| [var2](#spritevar2)	|
-| boolean	| [flag1](#spriteflag1)	|
-| boolean	| [flag2](#spriteflag2)	|
+| double	| [mapOffset](#spritemapoffset)	|
 
 | **[Contructor summary](#sprite-constructor)** |
 | --- |
@@ -679,8 +924,9 @@ This pseudo-class creates an element to be used in the game, interactive with ot
 | --- | --- |
 | boolean	| [collisionBox(Sprite spr, optional double hotspotX, optional double hotspotY)](#spritecollisionbox)	|
 | boolean	| [collisionCircle(Sprite spr, optional boolean inner)](#spritecollisioncircle)	|
-| long	| [collisionMap(optional long type, optional double hotspotX, optional double hotspotY)](#spritecollisionmap)	|
-| long	| [collisionMapEx(long exception)](#spritecollisionmapex)	|
+| long	| [collisionMap(optional long type, optional double hotspotX, optional double hotspotY, optional long exception)](#spritecollisionmap)	|
+| long	| [collisionMapClosest(optional long type, optional double hotspotX, optional double hotspotY)](#spritecollisionmapclosest)	|
+| void	| [collisionMapFunction(function callback)](#spritecollisionmapfunction)	|
 | long	| [collisionMapRange(long typeMin, long typeMax, optional double hotspotX, optional double hotspotY, optional long exception)](#spritecollisionmaprange)	|
 | long	| [collisionMapSwitch(long type, long newType, optional double hotspotX, optional double hotspotY, optional long exception)](#spritecollisionmapswitch)	|
 | boolean	| [collisionPoint(double x, double y)](#spritecollisionpoint)	|
@@ -692,9 +938,6 @@ This pseudo-class creates an element to be used in the game, interactive with ot
 | boolean	| [intersects(double x, double y, double width, double height)](#spriteintersects)	|
 | double	| [getAngle(void)](#spritegetangle)	|
 | double	| [getAngle(Sprite spr)](#spritegetangle)	|
-| Point	| [getCenter(void)](#spritegetcenter)	|
-| double	| [getCenterX(void)](#spritegetcenterx)	|
-| double	| [getCenterY(void)](#spritegetcentery)	|
 | double	| [getDiameter(optional boolean inner)](#spritegetdiameter)	|
 | double	| [getSpeed(void)](#spritegetspeed)	|
 | double	| [getWidth(void)](#spritegetwidth)	|
@@ -712,13 +955,13 @@ This pseudo-class creates an element to be used in the game, interactive with ot
 ```idl
 double x
 ```
-The x coordinate of the sprite.
+The x coordinate of the sprite, from it's center.
 
 #### Sprite.y
 ```idl
 double y
 ```
-The y coordinate of the sprite.
+The y coordinate of the sprite, from it's center.
 
 #### Sprite.width
 ```idl
@@ -743,6 +986,30 @@ Identifier of the sprite type in a group.
 long health
 ```
 The live points of the sprite.
+
+#### Sprite.left
+```idl
+double left
+```
+The x coordinate at the left of the sprite.
+
+#### Sprite.right
+```idl
+double right
+```
+The x coordinate at the right of the sprite.
+
+#### Sprite.top
+```idl
+double top
+```
+The y coordinate at the top of the sprite.
+
+#### Sprite.bottom
+```idl
+double bottom
+```
+The y coordinate at the bottom of the sprite.
 
 #### Sprite.vx
 ```idl
@@ -798,29 +1065,11 @@ boolean hflip
 ```
 Sets/gets if the image of the sprite is flipped in the horizontal axis.
 
-#### Sprite.var1
+#### Sprite.mapOffset
 ```idl
-double var1
+double mapOffset
 ```
-An extra numeric variable to use as needed.
-
-#### Sprite.var2
-```idl
-double var2
-```
-An extra numeric variable to use as needed.
-
-#### Sprite.flag1
-```idl
-boolean flag1
-```
-An extra boolean variable to use as needed.
-
-#### Sprite.flag2
-```idl
-boolean flag2
-```
-An extra boolean variable to use as needed.
+Disguises a world map sprite with another given the offset from the original sprite.
 
 ### Sprite constructor
 #### Sprite.Sprite
@@ -875,9 +1124,27 @@ Detects if the current sprite collides with another sprite within the circle are
 ```idl
 long collisionMap(optional long type = null,
 				  optional double hotspotX = null,
-				  optional double hotspotY = null)
+				  optional double hotspotY = null,
+				  optional long exception = null)
 ```
 Detects if the current sprite collides with a sprite of the World Map.
+
+**Parameters:**  
+*type* - The type of the map sprite to compare against.  
+*hotpotX* - The x coordinate hotspot.  
+*hotpotY* - The y coordinate hotspot. If set, the collision will be detected against the hotspot instead of the whole sprite.  
+*exception* - The position of the sprite not to be compared against in this function.
+
+**Returns:**  
+The position of the first found World Map sprite colliding, or 0 if none.
+
+#### Sprite.collisionMapClosest
+```idl
+long collisionMapClosest(optional long type = null,
+				  optional double hotspotX = null,
+				  optional double hotspotY = null)
+```
+Detects if the current sprite collides with a sprite of the World Map, and returns the closest one. This function is slower than `collisionMap`, so use it only when required the specific closest sprite.
 
 **Parameters:**  
 *type* - The type of the map sprite to compare against.  
@@ -885,19 +1152,16 @@ Detects if the current sprite collides with a sprite of the World Map.
 *hotpotY* - The y coordinate hotspot. If set, the collision will be detected against the hotspot instead of the whole sprite.
 
 **Returns:**  
-The position plus one of the closest World Map sprite colliding, or 0 if none. Because the lowest position might be 0, the returned value will be always bigger by one than the intended if the collision happens.
+The position of the closest World Map sprite colliding, or 0 if none.
 
-#### Sprite.collisionMapEx
+#### Sprite.collisionMapFunction
 ```idl
-long collisionMapEx(long exception)
+void collisionMapFunction(function callback(sprite))
 ```
-Detects if the current sprite collides with any sprite of the World Map, except the one received in the parameter. This function is specially useful when comparing a World Map sprite against the others.
+Executes the sent function with each and every collisioning sprite. The callback function must receive one variable that is the collisioning sprite.
 
 **Parameters:**  
-*exception* - The position of the sprite not to be compared against in this function.
-
-**Returns:**  
-The position plus one of the closest World Map sprite colliding except the one received, or 0 otherwise. Because the lowest position might be 0, the returned value will be always bigger by one than the intended if the collision happens.
+*callback(sprite)* - The function to be executed with each and every collisioning sprite.
 
 #### Sprite.collisionMapRange
 ```idl
@@ -1059,33 +1323,6 @@ Calculates the angle between the current sprite and the given sprite.
 
 **Returns:**  
 The angle in degrees between the two sprites.
-
-#### Sprite.getCenter
-```idl
-Point getCenter(void)
-```
-Calculates the center of the sprite, considering the sprite scale.
-
-**Returns:**  
-A Pointer with the center of the sprite in the x a y coordinates.
-
-#### Sprite.getCenterX
-```idl
-double getCenterX(void)
-```
-Calculates the center of the sprite in the x coordinate, considering the sprite scale.
-
-**Returns:**  
-The center of the sprite in the x coordinate.
-
-#### Sprite.getCenterY
-```idl
-double getCenterY(void)
-```
-Calculates the center of the sprite in the y coordinate, considering the sprite scale.
-
-**Returns:**  
-The center of the sprite in the y coordinate.
 
 #### Sprite.getDiameter
 ```idl
@@ -1335,7 +1572,11 @@ This pseudo-class contains an array of sprites to be manipulated as one group.
 | void	| [addSprite(double x, double y, double width, optional double height, optional long type)](#spritevectoraddsprite)	|
 | void	| [addMap(long map, long cols, double width, optional double height, optional SpriteVector masterSprites)](#spritevectoraddmap)	|
 | boolean	| [collisionBox(Sprite spr)](#spritevectorcollisionbox)	|
+| boolean	| [contains(Object obj)](#spritevectorcontains)	|
+| boolean	| [contains(double x, double y, optional double width, optional double height)](#spritevectorcontains)	|
 | void	| [drawSprites(CanvasRenderingContext2D ctx, optional Image img, optional double offsetX, optional double offsetY)](#spritevectordrawsprites)	|
+| boolean	| [intersects(Object obj)](#spritevectorintersects)	|
+| boolean	| [intersects(double x, double y, double width, double height)](#spritevectorintersects)	|
 | Sprite	| [getSprite(long position)](#spritevectorgetsprite)	|
 | void	| [move(void)](#spritevectormove)	|
 
@@ -1401,6 +1642,35 @@ Detects if the specified sprite collides with any of the sprites inside the spri
 **Returns:**  
 `true` if any of the sprites inside the sprite vector collides with the given sprite, `false` otherwise.
 
+#### SpriteVector.contains
+```idl
+boolean contains(Object obj)
+```
+Detects if any sprite in the current sprite vector contains within it's bounds the specified object, being it a point or a rectangle. It doesn't takes on count if the rectangle is scaled.
+
+**Parameters:**  
+*obj* - The object to compare against.
+
+**Returns:**  
+`true` if any sprite in the current sprite vector contains within it's bounds the comparing object, `false` otherwise.
+
+```idl
+boolean contains(double x,
+				 double y,
+				 optional double width,
+				 optional double height)
+```
+Detects if any sprite in the current sprite vector contains within it's bounds the specified point or area.
+
+**Parameters:**  
+*x* - The x coordinate of the point or area to compare.  
+*y* - The y coordinate of the point or area to compare.  
+*width* - The width of the area to compare.  
+*height* - The height of the area to compare.
+
+**Returns:**  
+`true` if any sprite in the current sprite vector contains within it's bounds the comparing point or area, `false` otherwise.
+
 #### SpriteVector.drawSprites
 ```idl
 void drawSprites(CanvasRenderingContext2D ctx,
@@ -1415,6 +1685,35 @@ Draws all the sprites in the sprite vector on the given `CanvasRenderingContext2
 *image* - The specified image to be drawn. If you send an array of images instead of just one image, the image drawn will be that in the place order of the sprite type.  
 *offsetX* - The offset in the x coordinate to move the image from the sprites.  
 *offsetY* - The offset in the y coordinate to move the image from the sprites.
+
+#### SpriteVector.intersects
+```idl
+boolean intersects(Object obj)
+```
+Detects if any sprite in the current sprite vector intersects within it's bounds the specified object, being it a point or a rectangle. In contrast with `Sprite.collisionBox`, this function doesn't takes on count if the rectangle is scaled.
+
+**Parameters:**  
+*obj* - The object to compare against.
+
+**Returns:**  
+`true` if any sprite in the current sprite vector intersects within it's bounds the comparing object, `false` otherwise.
+
+```idl
+boolean intersects(double x,
+				   double y
+				   double width,
+				   double height)
+```
+Detects if any sprite in the current sprite vector intersects within it's bounds the specified area.
+
+**Parameters:**  
+*x* - The x coordinate of the area to compare.  
+*y* - The y coordinate of the area to compare.  
+*width* - The width of the area to compare.  
+*height* - The height of the area to compare.
+
+**Returns:**  
+`true` if any sprite in the current sprite vector within it's bounds the comparing point or area, `false` otherwise.
 
 #### SpriteVector.getSprite
 ```idl
@@ -1433,50 +1732,6 @@ The sprite in the given position inside the sprite vector.
 void move(void)
 ```
 Moves all the sprites inside the sprite vector.
-
-## Camera
-```idl
-static Camera()
-```
-Camera is an static pseudo-class which holds the coordinates from where the screen elements will start to be drawn.
-
-| | **[Variables summary](#camera-variables)** |
-| --- | --- |
-| long	| [x](#camerax)	|
-| long	| [y](#cameray)	|
-
-| | **[Functions summary](#camera-functions)** |
-| --- | --- |
-| void	| [focus(Sprite spr, optional double slide, optional double offsetX, optional double offsetY)](#camerafocus)	|
-
-### Camera variables
-#### Camera.x
-```idl
-long x
-```
-The x coordinate from which the screen elements will start to draw.
-
-#### Camera.y
-```idl
-long y
-```
-The y coordinate from which the screen elements will start to draw.
-
-### Camera functions
-#### Camera.focus
-```idl
-void focus(Sprite spr,
-		   optional double slide = 0,
-		   optional double offsetX = 0,
-		   optional double offsetY = 0)
-```
-The camera centers on the given sprite.
-
-**Parameters:**  
-*spr* - The sprite to which the camera will center.  
-*slide* - If this value is bigger than 0, the camera will slowly move `slide` pixels each loop until the sprite is centered.  
-*offsetX* - Horizontal distance from the world border to limit the camera movement. Negative values allow the camera to move beyond the world horizontal border.  
-*offsetY* - Vertical distance from the world border to limit the camera movement. Negative values allow the camera to move beyond the world vertical border. If no value is given, `offsetY` will take the value of `offsetX`.
 
 ## Input
 ```idl
@@ -1508,6 +1763,7 @@ Input is an static pseudo-class which handles all external inputs, including key
 | void	| [disableMouse()](#inputdisablemouse)	|
 | void	| [disableOrientation()](#inputdisableorientation)	|
 | void	| [disableTouch()](#inputdisabletouch)	|
+| void	| [virtualKey(long key, boolean action)](#inputvirtualkey)	|
 
 ### Input variables
 #### Input.acceleration
@@ -1518,11 +1774,18 @@ Acceleration is an static object which handles the gravity acceleration on suppo
 
 | | **[Variables summary](#inputacceleration-variables)** |
 | --- | --- |
+| boolean	| [active](#inputaccelerationactive)	|
 | double	| [x](#inputaccelerationx)	|
 | double	| [y](#inputaccelerationy)	|
 | double	| [z](#inputaccelerationy)	|
 
 ##### Input.acceleration variables
+###### Input.acceleration.active
+```idl
+boolean active
+```
+Whether the acceleration is enabled or not. It will be false if `Input.enableAcceleration` is called but the device doesn't supports it.
+
 ###### Input.acceleration.x
 ```idl
 double x
@@ -1577,6 +1840,7 @@ Mouse is an static object which handles the coordinates of the mouse, respective
 | long	| [y](#inputmousey)	|
 | long	| [ox](#inputmouseox)	|
 | long	| [oy](#inputmouseoy)	|
+| boolean	| [move](#inputmousemove)	|
 
 | | **[Functions summary](#inputmouse-functions)** |
 | --- | --- |
@@ -1607,6 +1871,12 @@ long oy
 ```
 The origin y coordinate of the mouse since the mouse button started to be pressed.
 
+###### Input.mouse.move
+```idl
+boolean move
+```
+Returns whether the mouse is in motion or not.
+
 ##### Input.mouse functions
 ###### Input.mouse.draw
 ```idl
@@ -1625,11 +1895,25 @@ Orientation is an static object which handles the orientation angle in degrees o
 
 | | **[Variables summary](#inputorientation-variables)** |
 | --- | --- |
+| boolean	| [absolute](#inputorientationabsolute)	|
+| boolean	| [active](#inputorientationactive)	|
 | double	| [alpha](#inputorientationalpha)	|
 | double	| [beta](#inputorientationbeta)	|
 | double	| [gamma](#inputorientationgamma)	|
 
 ##### Input.orientation variables
+###### Input.orientation.absolute
+```idl
+boolean absolute
+```
+Whether the device returns the orientation in absolute mode or not.
+
+###### Input.orientation.active
+```idl
+boolean active
+```
+Whether the orientation is enabled or not. It will be false if `Input.enableOrientation` is called but the device doesn't supports it.
+
 ###### Input.orientation.alpha
 ```idl
 double alpha
@@ -1776,6 +2060,39 @@ void disableTouch(void)
 ```
 Disables touch listener.
 
+#### Input.virtualKey
+```idl
+void virtualKey(long key,
+				boolean action)
+```
+Simulates the action of pressing a key, given the boolean result of an action. This handles the management for the values on `input.lastPress`, `input.lastRelease` and `input.pressing`.
+
+**Parameters:**  
+*key* - The value of the key to be simulated.  
+*action* - The boolean result of the evaluated action to determine if the key is pressed or not.
+
+## Toast
+```idl
+static Toast()
+```
+Toast is an static pseudo-class for displaying a temporal message on screen.
+
+| | **[Functions summary](#toast-functions)** |
+| --- | --- |
+| void	| [makeText(DOMString str, double time)](#toastmaketext)	|
+
+### Toast functions
+#### Toast.makeText
+```idl
+void makeText(DOMString str,
+			  double time)
+```
+Creates and displays a toast with the specified name for the specified time in seconds. Since only one toast can be displayed on screen at time, if a new one is created, it will replace the older one.
+
+**Parameters:**    
+*str* - The text to be displayed.  
+*time* - The time in seconds to display the message on screen.
+
 ## Util
 ```idl
 static Util()
@@ -1789,6 +2106,7 @@ Util is an static pseudo-class with many helpful functions for your games.
 | Audio	| [getAudio(DOMString str)](#utilgetaudio)	|
 | double	| [getDistance(double x1, double y1, double x2, double y2)](#utilgetdistance)	|
 | Image	| [getImage(DOMString str)](#utilgetimage)	|
+| double	| [random(double max)](#utilrandom)	|
 
 ### Util functions
 #### Util.fillTile
@@ -1870,6 +2188,18 @@ Creates and returns a new image with the specified path in the string.
 **Returns**  
 A new image with the specified path in the string.
 
+#### Util.random
+```idl
+double random(double max)
+```
+Gets a random floating number from 0.0 to max. Should be parsed with `Math.floor(random(max))` to get an integer number.
+
+**Parameters:**  
+*max* - The max number `random` should return.
+
+**Returns:**  
+A random floating number from 0.0 to `max`.
+
 ## World
 World is an static pseudo-class containing all the elements for the current world in the screen.
 
@@ -1878,6 +2208,7 @@ World is an static pseudo-class containing all the elements for the current worl
 | long	| [width](#worldwidth)	|
 | long	| [height](#worldheight)	|
 | SpriteVector	| [map](#worldmap)	|
+| Camera	| [cam](#worldcam)	|
 | boolean	| [loopX](#worldloopX)	|
 | boolean	| [loopY](#worldloopY)	|
 
@@ -1885,7 +2216,7 @@ World is an static pseudo-class containing all the elements for the current worl
 | --- | --- |
 | void	| [drawMap(CanvasRenderingContext2D ctx, optional Image img, optional boolean deviation)](#worlddrawMap)	|
 | void	| [drawMap(CanvasRenderingContext2D ctx, optional SpriteSheet spritesheet, optional boolean deviation)](#worlddrawMap)	|
-| void	| [setMap(long map, long cols, double width, optional double height)](#worldsetmap)	|
+| void	| [setMap(long map, double width, optional double height, optional long cols)](#worldsetmap)	|
 | void	| [setSize(double width, double height)](#worldsetsize)	|
 
 ### World variables
@@ -1893,19 +2224,25 @@ World is an static pseudo-class containing all the elements for the current worl
 ```idl
 long width
 ```
-The width of the world. Going beyond this point is considered as goind out of the world, and should be managed as a sprite killer or to return it to the world area. This value is taken by the Camera as the furthest point it can move automatically in the horizontal axis.
+The width of the world. Going beyond this point is considered as going out of the world, and should be managed as a sprite killer or to return it to the world area. This value is taken by the Camera pseudo-class as the furthest point it can move automatically in the horizontal axis.
 
 #### World.height
 ```idl
 long height
 ```
-The height of the world. Going beyond this point is considered as goind out of the world, and should be managed as a sprite killer or to return it to the world area. This value is taken by the Camera as the furthest point it can move automatically in the vertical axis.
+The height of the world. Going beyond this point is considered as going out of the world, and should be managed as a sprite killer or to return it to the world area. This value is taken by the Camera pseudo-class as the furthest point it can move automatically in the vertical axis.
 
 #### World.map
 ```idl
 SpriteVector map
 ```
 The map of the world. Usually used to manage static elements in the game (as walls), and sometimes even the enemies and other sprites.
+
+#### World.cam
+```idl
+Camera cam
+```
+The camera of the world. All the sprites will be drawn on screen respectively to this.
 
 #### World.loopX
 ```idl
@@ -1948,17 +2285,17 @@ Draws the world map with the given sprite sheet.
 #### World.setMap
 ```idl
 void setMap(long map[],
-			long cols,
 			double width,
-			optional double height)
+			optional double height,
+			optional long cols)
 ```
-Sets the world map from a numeric map array. It will set the width and height of the world as the total area containing all the blocks in the map.
+Sets the world map from a numeric map array. It will set the width and height of the world as the total area containing all the blocks in the map. If `cols` is not specified, the first value on the map array will be used as this value; this allow to manipulate multiple maps easier.
 
 **Parameters:**  
 *map* - A numeric array with the map blocks positions. Zeros will be ignored.  
-*cols* - The number of columns per row in the numeric map array.  
 *width* - The width of each block in the map.  
-*height* - The height of each block in the map. If not set, it will take the value of the width.
+*height* - The height of each block in the map. If not set, it will take the value of the width.  
+*cols* - The number of columns per row in the numeric map array.
 
 #### World.setSize
 ```idl
@@ -1983,7 +2320,7 @@ The second parameter when creating a new `Canvas` is the Fullscreen Mode; there 
 **Static scale**  
 0 is FULLSCREEN_NORMAL - Bars of `BackgroundColor` will be added if needed.  
 1 is FULLSCREEN_ZOOM - Stage will crop to fill screen.  
-2 is FULLSCREEN_STRETCH - Image will stretch to fill the screen.
+2 is FULLSCREEN_STRETCH - Image will stretch and deform to fill the screen.
 
 **Dynamic scale**   
 3 is FULLSCREEN_RESIZE_LANDSCAPE - Proportion will adapt to the width if it is bigger than the height, and then scale.  

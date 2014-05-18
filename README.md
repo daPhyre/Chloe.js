@@ -6,8 +6,6 @@ COJSGE is intended to be a practical easy-to-use code for developing HTML5 games
 
 Since COJSGE 0.9, the engine focuses on full support for both desktop and mobile HTML5 games.
 
-This is still an experimental JavaScript code, which can and may change radically. Future versions are not promised to be compatible with the current one.
-
 The code included is:
  * reference.md		- All about the project, and how to use it
  * cojsge.js 		- The engine
@@ -19,7 +17,7 @@ The code included is:
  * example1.js 		- An example (source)
  * media 			- A folder containing all the media needed for the example
 
-In example1.js, you can switch the comments in line 142 for line 143 and in line 193 for 194 to explore fun effects.
+In example1.js, you can switch the comments in line 147 for line 148 and in line 192 for 193 to explore fun effects.
 
 Questions, Suggestions, Gratifications*?
 Contact the developer at webmaster@jugaa.me
