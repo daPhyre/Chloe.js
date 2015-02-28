@@ -1,9 +1,9 @@
 /**
-* Canvas Open JavaScript Game Engine Definitions
-* @author daPhyre
-* @since 0.8, Sa/18/Jan/13
-* @version 0.9, Su/16/Jun/13
-*/
+ * Chloe_defs.js: Canvas HTML5 Light Open Engine Definitions
+ * @author daPhyre
+ * @since 0.8, Sa/18/Jan/13
+ * @version 0.9, Su/16/Jun/13
+ */
 
 const FULLSCREEN_NORMAL = 0;
 const FULLSCREEN_ZOOM = 1;

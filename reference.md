@@ -2,13 +2,11 @@
 
 ## About
 
-COJSGE stands for Canvas Open JavaScript Game Engine. It is pronounced as COJ'SGE (Very similar to "coshge", with a soft g as in "get").
-
-COJSGE is intended to be a practical easy-to-use engine for developing games for desktop and mobile with HTML5 Canvas + JavaScript, but can also be used for any project using this technology. Current version is 1.0.
+Chloe.js is intended to be a practical easy-to-use engine for developing games for desktop and mobile with HTML5 Canvas + JavaScript, but can also be used for any project using this technology. Current version is 1.0.0.
 
 ## Use
 
-To start using COJSGE, you must start a new canvas, and put your code inside the `onReady` function. Next, there is an example with the most basic configuration of a code with COJSGE:
+To start using Chloe.js, you must start a new canvas, and put your code inside the `onReady` function. Next, there is an example with the most basic configuration of a code with Chloe.js:
 
 ```javascript
 var myCanvas=new Canvas();
@@ -29,26 +27,15 @@ myCanvas.onReady=function(){
 }
 ```
 
-For a more advanced example, please refer to the file [example1.js](http://github.com/daPhyre/cojsge/blob/master/example1.js) included with COJSGE.
-
-## Using cojsge.jsz
-
-Using cojsge.jsz will be slightly faster to download and use less bandwith in your server. To use it, create a `.htaccess` file and add the next lines on it:
-
-```
-AddEncoding x-gzip .jsz
-AddType application/javascript .jsz
-```
-
-Just upload this file in your server, and you can use `.jsz` as any `.js` file. Don't forget this works only on server-side codes, so for testing on your PC, you must use the normal `cojsge.js` script.
+For a more advanced example, please refer to the file [example1.js](http://github.com/daPhyre/Chloe.js/blob/master/examples/example1.js) included with Chloe.js.
 
 ## Components
 
-COJSGE is formed by many Pseudo-classes that allow developers to make frequent actions in games with few lines, letting them to focus more on the game logic and less on the basic behavior.
+Chloe.js is formed by many Pseudo-classes that allow developers to make frequent actions in games with few lines, letting them to focus more on the game logic and less on the basic behavior.
 
 As JavaScript doesn't needs to declare type of variables, nor if the pseudo-classes are static or not, I will partialy use [WebIDL](http://www.w3.org/TR/WebIDL) in this documentation, to allow developers an easy understanding of the pseudo-classes and functions within it.
 
-The current pseudo-classes in COJSGE are these:
+The current pseudo-classes in Chloe.js are these:
  * [Canvas](#canvas)
  * [Animation] (#animation)
  * [Button] (#button)
@@ -84,7 +71,7 @@ A temporal workaround to switch canvas quality when scaled, while `CanvasRenderi
 
 ### Public functions
 #### Array
-COJSGE extends the `Array` elements, giving them the properties `insert(long position, object element)`, `remove(long position)` and `removeAll()`.
+Chloe.js extends the `Array` elements, giving them the properties `insert(long position, object element)`, `remove(long position)` and `removeAll()`.
 
 ## Canvas
 The `Canvas` pseudo-class starts the canvas with id "canvas", if no other ID is specified. This class is needed to start the engine.
@@ -122,7 +109,7 @@ Canvas(optional DOMString canvasId = "canvas",
 Creates a new canvas with ID canvasID.
 
 **Parameters:**  
-*canvasId* - ID of the canvas to be bound. If no ID is given, COJSGE will search for the DOMElement with ID "canvas".  
+*canvasId* - ID of the canvas to be bound. If no ID is given, Chloe.js will search for the DOMElement with ID "canvas".  
 *fullMode* - The way to fill the screen when in Fullscreen Mode. See [Fullscreen Mode](#fullscreen-mode) for more information.  
 *autoFull* - Sets if the canvas will fill automatically the screen when user enters into Fullscreen mode (Like, when pressing F11).  
 *autoFullOnMobile* - Sets if the canvas will fill automatically the screen when the screen is smaller than the canvas bound, common default task on mobile devices.  
@@ -1808,13 +1795,13 @@ The z coordinate acceleration of the device.
 ```idl
 long lastPress
 ```
-The last pressed key on the keyboard, or the last pressed mouse button. To know if an specific key has been pressed, you should call for example `if(lastPress==KEY_SPACEBAR)` (see [cojsge_defs](#cojsge_defsjs)). You should assign `null` to `lastPress` after using it, as the loop will continue returning `true` in the past example if not.
+The last pressed key on the keyboard, or the last pressed mouse button. To know if an specific key has been pressed, you should call for example `if(lastPress==KEY_SPACEBAR)` (see [chloe_defs](#chloe_defsjs)). You should assign `null` to `lastPress` after using it, as the loop will continue returning `true` in the past example if not.
 
 #### Input.lastRelease
 ```idl
 long lastRelease
 ```
-The last released key on the keyboard, or the last released mouse button. To know if an specific key has been released, you should call for example `if(lastRelease==KEY_SPACEBAR)` (see [cojsge_defs](#cojsge_defsjs)). You should assign `null` to `lastRelease` after using it, as the loop will continue returning `true` in the past example if not.
+The last released key on the keyboard, or the last released mouse button. To know if an specific key has been released, you should call for example `if(lastRelease==KEY_SPACEBAR)` (see [chloe_defs](#chloe_defsjs)). You should assign `null` to `lastRelease` after using it, as the loop will continue returning `true` in the past example if not.
 
 #### Input.lastTouchPress
 ```idl
@@ -1937,7 +1924,7 @@ The gamma orientation of the device.
 ```idl
 boolean pressing[]
 ```
-Array that keep track of the current pressed keys and mouse buttons. To know if an specific key is being press, you should call for example `if(pressing[KEY_SPACEBAR])` (see [cojsge_defs](#cojsge_defsjs)).
+Array that keep track of the current pressed keys and mouse buttons. To know if an specific key is being press, you should call for example `if(pressing[KEY_SPACEBAR])` (see [chloe_defs](#chloe_defsjs)).
 
 #### Input.touches
 ```idl
@@ -2308,14 +2295,14 @@ Manually sets the size of the current world.
 *width* - The new width of the world.  
 *height* - The new height of the world.
 
-## cojsge_defs.js
+## chloe_defs.js
 
-To make easier some tasks with COJSGE, there is a second optional file included, called `cojsge_defs`. It includes definitions to the values of the keyboard keys, the mouse buttons and the fullscreen modes to set in the COGJSGE `Canvas` Class on it's creation. As you can access the numeric values directly, these definitions can make the coding of your project an easier task.
+To make easier some tasks with Chloe.js, there is a second optional file included, called `chloe_defs`. It includes definitions to the values of the keyboard keys, the mouse buttons and the fullscreen modes to set in the Chloe.js `Canvas` Class on it's creation. As you can access the numeric values directly, these definitions can make the coding of your project an easier task.
 
 Feel free to explore the file, so you can know the options you have when making a project, or as a cheat code to the common numeric values of the mouse and keyboard buttons.
 
 ### Fullscreen Mode
-The second parameter when creating a new `Canvas` is the Fullscreen Mode; there are 7 types of Fullscreen Mode for scale in COJSGE. The first 3 are static scale, that means, the proportion of the canvas will be kept the same. The remaining 4 are dynamic, which changes the proportion of the canvas to better fit the screen, but use these carefully and test thoroughly, as it may cause unexpected behaviour.
+The second parameter when creating a new `Canvas` is the Fullscreen Mode; there are 7 types of Fullscreen Mode for scale in Chloe.js. The first 3 are static scale, that means, the proportion of the canvas will be kept the same. The remaining 4 are dynamic, which changes the proportion of the canvas to better fit the screen, but use these carefully and test thoroughly, as it may cause unexpected behaviour.
 
 **Static scale**  
 0 is FULLSCREEN_NORMAL - Bars of `BackgroundColor` will be added if needed.  
@@ -2330,4 +2317,4 @@ The second parameter when creating a new `Canvas` is the Fullscreen Mode; there 
 
 ## License
 
-Read the attached LICENSE.txt file for full details about legal stuff with COJSGE and so.
+Read the attached LICENSE.txt file for full details about legal stuff with Chloe.js and so.

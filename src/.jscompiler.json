@@ -1,0 +1,11 @@
+{
+	"outputs": [
+		{
+			"inputs": ["canvas.js", "animation.js", "button.js", "camera.js", "particle.js", "particlesystem.js", "scene.js", "sprite.js", "spritesheet.js", "spritevector.js", "input.js", "toast.js", "util.js", "world.js"],
+			"output": "../chloe.js",
+			"generateMap": true,
+			"mangle": true,
+			"isolate": false
+		}
+	]
+}

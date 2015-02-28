@@ -1,25 +1,21 @@
-# COJSGE: Canvas Open JavaScript Game Engine #
+# Chloe.js: Canvas HTML5 Light Open Engine #
 
 Based on http://code.google.com/p/kojage/
 
-COJSGE is intended to be a practical easy-to-use code for developing HTML5 games with the use of Canvas and JavaScript.
+Chloe.js is intended to be a practical easy-to-use code for developing HTML5 games with the use of Canvas and JavaScript.
 
-Since COJSGE 0.9, the engine focuses on full support for both desktop and mobile HTML5 games.
+Since version 0.9, the engine focuses on full support for both desktop and mobile HTML5 games.
 
 The code included is:
+ * src/				- The source files of the engine
+ * examples/		- A folder containing examples of use
+ * chloe.js 		- The engine, minimizied
+ * chloe.js.map 	- The source map of the minimizied engine
+ * chloe_defs.js 	- Some constant definitions to make Chloe.js easier to use
+ * chloejs.png		- The project logo
  * reference.md		- All about the project, and how to use it
- * cojsge.js 		- The engine
- * cojsge.jsz 		- The engine, compressed in gzip format (See reference for use)
- * cojsge_defs.js 	- Some constant definitions to make COJSGE easier to use
- * cursor.png 		- Personalizable cursor for on canvas display (You can replace it)
- * cojsge.png		- The project logo
- * example1.html 	- An example (visual)
- * example1.js 		- An example (source)
- * media 			- A folder containing all the media needed for the example
 
-In example1.js, you can switch the comments in line 147 for line 148 and in line 192 for 193 to explore fun effects.
+In examples/example1.js, you can switch the comments in line 165 for line 166 and in line 219 for 220 to explore fun effects.
 
-Questions, Suggestions, Gratifications*?
+Questions, Suggestions?
 Contact the developer at webmaster@jugaa.me
-
-\*(As in simple thanks or whatever you wish =D)
